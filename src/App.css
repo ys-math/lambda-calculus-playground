@@ -60,6 +60,7 @@
 
 .definitions,
 .examples,
+.saved,
 .lessons,
 .controls-row,
 .stepper {
@@ -416,6 +417,8 @@
 }
 
 .definitions h2,
+.examples h2,
+.saved h2,
 .lessons h2 {
   margin: 0 0 4px;
   font-size: 1.2rem;
@@ -507,6 +510,92 @@
 .chip:hover {
   border-color: var(--accent);
   color: var(--accent);
+}
+
+/* Saved formulas ---------------------------------------------------------- */
+
+.saved {
+  padding: 18px;
+}
+
+.save-btn {
+  margin: 10px 0;
+  width: 100%;
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid var(--accent);
+  border-radius: 9px;
+  padding: 9px 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: filter 0.12s;
+}
+
+.save-btn:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.save-btn:disabled {
+  background: var(--panel-2);
+  color: var(--muted);
+  border-color: var(--border);
+  cursor: not-allowed;
+}
+
+.saved-empty {
+  margin: 4px 0 0;
+}
+
+.saved-list {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.saved-list li {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.saved-item {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  overflow: hidden;
+}
+
+.saved-item code {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.84rem;
+}
+
+.saved-item:hover {
+  border-color: var(--accent);
+}
+
+.saved-remove {
+  background: none;
+  border: 1px solid transparent;
+  color: var(--muted);
+  border-radius: 8px;
+  padding: 0 8px;
+  font-size: 0.9rem;
+}
+
+.saved-remove:hover {
+  color: var(--error);
 }
 
 /* Examples + Lessons ------------------------------------------------------ */

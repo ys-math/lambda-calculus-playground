@@ -4,7 +4,10 @@ import ReductionStepper from './components/ReductionStepper'
 import StrategyPicker from './components/StrategyPicker'
 import Definitions from './components/Definitions'
 import Examples from './components/Examples'
+import SavedFormulas from './components/SavedFormulas'
 import Lessons from './components/Lessons'
+import { useLocalStorage } from './hooks/useLocalStorage'
+import { addFormula, removeFormula } from './lib/savedFormulas'
 import { parse } from './lambda/parser'
 import type { ParseError } from './lambda/parser'
 import type { Term } from './lambda/ast'
@@ -24,6 +27,11 @@ export default function App() {
   const [eta, setEta] = useState(false)
   const [showAlpha, setShowAlpha] = useState(true)
   const [userDefs, setUserDefs] = useState<Definition[]>([])
+  // Saved formulas persist across sessions in localStorage.
+  const [savedFormulas, setSavedFormulas] = useLocalStorage<string[]>(
+    'lambda-playground:saved-formulas',
+    [],
+  )
 
   // Build the active environment: built-ins overlaid with the user's definitions.
   const env: Environment = useMemo(() => {
@@ -62,6 +70,12 @@ export default function App() {
   }
   const insertName = (name: string) => {
     setInput((cur) => (cur.length === 0 || cur.endsWith(' ') ? cur + name : cur + ' ' + name))
+  }
+  const saveCurrentFormula = () => {
+    setSavedFormulas((list) => addFormula(list, input))
+  }
+  const removeSavedFormula = (expr: string) => {
+    setSavedFormulas((list) => removeFormula(list, expr))
   }
 
   return (
@@ -119,6 +133,13 @@ export default function App() {
         )}
 
         <aside className="ws-side">
+          <SavedFormulas
+            saved={savedFormulas}
+            current={input}
+            onSave={saveCurrentFormula}
+            onLoad={setInput}
+            onRemove={removeSavedFormula}
+          />
           <Definitions
             userDefs={userDefs}
             onAdd={addDef}
