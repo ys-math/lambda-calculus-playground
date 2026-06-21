@@ -3,6 +3,7 @@ import TermInput from './components/TermInput'
 import ReductionStepper from './components/ReductionStepper'
 import StrategyPicker from './components/StrategyPicker'
 import Definitions from './components/Definitions'
+import Examples from './components/Examples'
 import Lessons from './components/Lessons'
 import { parse } from './lambda/parser'
 import type { ParseError } from './lambda/parser'
@@ -73,63 +74,62 @@ export default function App() {
         </p>
       </header>
 
-      <div className="layout">
-        <main className="playground">
-          <TermInput value={input} onChange={setInput} term={term} error={error} />
+      <div className="workspace">
+        <TermInput value={input} onChange={setInput} term={term} error={error} />
 
-          <div className="controls-row">
-            <StrategyPicker value={strategy} onChange={setStrategy} />
-            <div className="controls-stack">
-              <label className="cap-picker">
-                Step cap
-                <select value={maxSteps} onChange={(e) => setMaxSteps(Number(e.target.value))}>
-                  {STEP_CAP_OPTIONS.map((n) => (
-                    <option key={n} value={n}>{n}</option>
-                  ))}
-                </select>
-              </label>
-              <label className="toggle" title="λx. M x → M when x is not free in M">
-                <input type="checkbox" checked={eta} onChange={(e) => setEta(e.target.checked)} />
-                Include η-reduction
-              </label>
-              <label className="toggle" title="Rename bound variables explicitly before a capturing β-step">
-                <input
-                  type="checkbox"
-                  checked={showAlpha}
-                  onChange={(e) => setShowAlpha(e.target.checked)}
-                />
-                Show α-conversion steps
-              </label>
-            </div>
+        <div className="controls-row">
+          <StrategyPicker value={strategy} onChange={setStrategy} />
+          <div className="controls-stack">
+            <label className="cap-picker">
+              Step cap
+              <select value={maxSteps} onChange={(e) => setMaxSteps(Number(e.target.value))}>
+                {STEP_CAP_OPTIONS.map((n) => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
+              </select>
+            </label>
+            <label className="toggle" title="λx. M x → M when x is not free in M">
+              <input type="checkbox" checked={eta} onChange={(e) => setEta(e.target.checked)} />
+              Include η-reduction
+            </label>
+            <label className="toggle" title="Rename bound variables explicitly before a capturing β-step">
+              <input
+                type="checkbox"
+                checked={showAlpha}
+                onChange={(e) => setShowAlpha(e.target.checked)}
+              />
+              Show α-conversion steps
+            </label>
           </div>
+        </div>
 
-          {expanded ? (
-            <ReductionStepper
-              term={expanded}
-              strategy={strategy}
-              maxSteps={maxSteps}
-              eta={eta}
-              showAlpha={showAlpha}
-              recognizer={recognizer}
-            />
-          ) : (
-            <p className="empty-note">
-              Enter a valid expression above to start reducing.
-            </p>
-          )}
+        {expanded ? (
+          <ReductionStepper
+            term={expanded}
+            strategy={strategy}
+            maxSteps={maxSteps}
+            eta={eta}
+            showAlpha={showAlpha}
+            recognizer={recognizer}
+          />
+        ) : (
+          <p className="empty-note">
+            Enter a valid expression above to start reducing.
+          </p>
+        )}
 
+        <aside className="ws-side">
           <Definitions
             userDefs={userDefs}
             onAdd={addDef}
             onRemove={removeDef}
             onInsert={insertName}
           />
-        </main>
-
-        <aside className="sidebar">
-          <Lessons onLoad={setInput} />
+          <Examples onLoad={setInput} />
         </aside>
       </div>
+
+      <Lessons onLoad={setInput} />
 
       <footer className="app-footer">
         <p>

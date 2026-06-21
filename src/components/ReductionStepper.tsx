@@ -64,19 +64,23 @@ export default function ReductionStepper({
         <MathView latex={toLatex(current, nextStep?.redexPath)} display />
       </div>
 
-      {hasRecognition && (
-        <div className="recognition">
-          <span className="recognition-label">Recognized as</span>
-          {recognition.names.map((name) => (
-            <span key={name} className="recognition-name">{name}</span>
-          ))}
-          {recognition.churchNumeral !== null && (
-            <span className="recognition-num">
-              Church numeral {recognition.churchNumeral}
-            </span>
-          )}
-        </div>
-      )}
+      {/* Always rendered (with reserved height) so showing/hiding the match
+          never shifts the controls below it. */}
+      <div className="recognition">
+        {hasRecognition && (
+          <>
+            <span className="recognition-label">Recognized as</span>
+            {recognition.names.map((name) => (
+              <span key={name} className="recognition-name">{name}</span>
+            ))}
+            {recognition.churchNumeral !== null && (
+              <span className="recognition-num">
+                Church numeral {recognition.churchNumeral}
+              </span>
+            )}
+          </>
+        )}
+      </div>
 
       <div className="stepper-controls">
         <button onClick={() => setIndex(0)} disabled={atStart} title="Reset to start">⏮</button>

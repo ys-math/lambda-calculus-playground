@@ -16,24 +16,52 @@
   max-width: 60ch;
 }
 
-.layout {
+/* Workspace: input + reduction controls + result in the main column, with the
+   definition/example buttons in a side column right next to the input. Named
+   grid areas let us reorder cleanly for narrow screens. */
+.workspace {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-  gap: 22px;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  grid-template-areas:
+    'input    side'
+    'controls side'
+    'result   side';
+  gap: 18px 22px;
+  align-items: start;
   margin-top: 24px;
 }
 
+.workspace > .term-input { grid-area: input; }
+.workspace > .controls-row { grid-area: controls; }
+.workspace > .stepper,
+.workspace > .empty-note { grid-area: result; }
+.workspace > .ws-side { grid-area: side; }
+
 @media (max-width: 900px) {
-  .layout {
+  .workspace {
     grid-template-columns: 1fr;
+    /* Keep the definition/example buttons directly under the input. */
+    grid-template-areas:
+      'input'
+      'side'
+      'controls'
+      'result';
   }
+}
+
+/* The side column stacks the Definitions and Examples cards. */
+.ws-side {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
 /* Panels ------------------------------------------------------------------ */
 
-.playground,
-.sidebar > section,
 .definitions,
+.examples,
+.lessons,
+.controls-row,
 .stepper {
   background: var(--panel);
   border: 1px solid var(--border);
@@ -41,28 +69,14 @@
   box-shadow: var(--card-shadow);
 }
 
-.playground {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
 /* Term input -------------------------------------------------------------- */
 
-/* Pin the input to the top of the playground so the definition buttons (and
-   other controls further down the same column) can be clicked while the field
-   stays in view. Negative margins let the bar span the card's full width and
-   cover content scrolling underneath. */
 .term-input {
-  position: sticky;
-  top: 0;
-  z-index: 5;
   background: var(--panel);
-  margin: -20px -20px 0;
-  padding: 18px 20px 14px;
-  border-bottom: 1px solid var(--border);
-  border-radius: 14px 14px 0 0;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--card-shadow);
+  padding: 18px 20px;
 }
 
 .field-label {
@@ -97,14 +111,17 @@
   box-shadow: 0 0 0 3px rgba(124, 156, 255, 0.18);
 }
 
+/* Fixed height (with internal scroll) so typing a longer term doesn't grow the
+   input block and push the page around. */
 .preview {
   margin-top: 12px;
-  min-height: 44px;
+  height: 60px;
   padding: 10px 14px;
   background: var(--panel-2);
   border-radius: 10px;
   display: flex;
   align-items: center;
+  overflow: auto;
 }
 
 .parse-error {
@@ -123,6 +140,7 @@
   flex-wrap: wrap;
   gap: 16px;
   align-items: flex-start;
+  padding: 16px;
 }
 
 .strategy-picker {
@@ -218,8 +236,11 @@
   gap: 14px;
 }
 
+/* Fixed height + internal scroll: the result box never resizes when the term
+   (or reduction step) changes, so panels below it stay put. Large terms scroll
+   inside the box rather than growing it. */
 .stepper-display {
-  min-height: 64px;
+  height: 150px;
   padding: 18px;
   background: var(--panel-2);
   border-radius: 12px;
@@ -227,16 +248,18 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  overflow-x: auto;
+  overflow: auto;
 }
 
-/* "Recognized as" line: folds the current term back to known names/numerals. */
+/* "Recognized as" line: folds the current term back to known names/numerals.
+   Always rendered with a reserved height so it never shifts the controls. */
 .recognition {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
   justify-content: center;
+  min-height: 28px;
 }
 
 .recognition-label {
@@ -365,10 +388,25 @@
   overflow-x: auto;
 }
 
-.empty-note,
 .cap-note {
   color: var(--muted);
   font-style: italic;
+}
+
+/* Placeholder shown in the result area before a valid term is entered; styled
+   as a panel with the same height as the stepper so the area doesn't jump. */
+.empty-note {
+  color: var(--muted);
+  font-style: italic;
+  background: var(--panel);
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 /* Definitions ------------------------------------------------------------- */
@@ -471,16 +509,16 @@
   color: var(--accent);
 }
 
-/* Lessons ----------------------------------------------------------------- */
+/* Examples + Lessons ------------------------------------------------------ */
 
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
+.examples {
+  padding: 18px;
 }
 
-.sidebar > section {
-  padding: 18px;
+/* Guided lessons span the full width below the workspace. */
+.lessons {
+  margin-top: 22px;
+  padding: 20px;
 }
 
 .lesson-list {

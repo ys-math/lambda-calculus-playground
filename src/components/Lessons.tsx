@@ -1,14 +1,13 @@
 import { useState } from 'react'
 import MathView from './MathView'
 import { LESSONS } from '../data/lessons'
-import { EXAMPLE_GROUPS } from '../data/examples'
 
 interface LessonsProps {
   onLoad: (expr: string) => void
 }
 
-// The learning panel: guided lessons plus a gallery of classic example terms.
-// Both can push an expression into the playground via `onLoad`.
+// The guided learning panel: ordered lessons, each able to load an example
+// expression into the input via `onLoad`.
 export default function Lessons({ onLoad }: LessonsProps) {
   const [openId, setOpenId] = useState<string>(LESSONS[0].id)
 
@@ -45,24 +44,6 @@ export default function Lessons({ onLoad }: LessonsProps) {
             </article>
           )
         })}
-      </div>
-
-      <h2>Examples</h2>
-      <div className="example-groups">
-        {EXAMPLE_GROUPS.map((group) => (
-          <div key={group.title} className="example-group">
-            <h3>{group.title}</h3>
-            <ul>
-              {group.examples.map((ex) => (
-                <li key={ex.label}>
-                  <button className="example-btn" onClick={() => onLoad(ex.expr)} title={ex.note}>
-                    {ex.label}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
       </div>
     </section>
   )
