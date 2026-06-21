@@ -1,0 +1,50 @@
+:root {
+  --bg: #0f1117;
+  --panel: #181b24;
+  --panel-2: #1f2430;
+  --border: #2a303c;
+  --text: #e6e9ef;
+  --muted: #9aa3b2;
+  --accent: #7c9cff;
+  --accent-2: #57d9a3;
+  --redex-bg: #fde68a;
+  --redex-fg: #1a1a1a;
+  --error: #ff7b72;
+
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.55;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(1200px 600px at 70% -10%, #1b2435 0%, var(--bg) 60%);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+code {
+  font-family: 'JetBrains Mono', 'SF Mono', ui-monospace, Menlo, monospace;
+}
+
+/* Redex highlight injected by the LaTeX pretty printer via \htmlClass{redex} */
+.redex {
+  background: var(--redex-bg);
+  color: var(--redex-fg);
+  border-radius: 4px;
+  padding: 0 2px;
+}
+
+.katex {
+  font-size: 1.15em;
+}
