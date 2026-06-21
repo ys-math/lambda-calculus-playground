@@ -97,6 +97,37 @@ describe('Church arithmetic', () => {
     expect(alphaEquiv(normalize('ISZERO ZERO').term, normalize('TRUE').term)).toBe(true)
     expect(alphaEquiv(normalize('ISZERO ONE').term, normalize('FALSE').term)).toBe(true)
   })
+
+  it('POW TWO THREE equals MULT of TWOs (eight)', () => {
+    expect(alphaEquiv(normalize('POW TWO THREE').term, normalize('MULT TWO FOUR').term)).toBe(true)
+  })
+})
+
+describe('predecessor, subtraction and comparison', () => {
+  it('PRED THREE equals TWO; PRED ZERO equals ZERO', () => {
+    expect(alphaEquiv(normalize('PRED THREE').term, normalize('TWO').term)).toBe(true)
+    expect(alphaEquiv(normalize('PRED ZERO').term, normalize('ZERO').term)).toBe(true)
+  })
+
+  it('SUB truncates at zero', () => {
+    expect(alphaEquiv(normalize('SUB FOUR TWO').term, normalize('TWO').term)).toBe(true)
+    expect(alphaEquiv(normalize('SUB TWO FOUR').term, normalize('ZERO').term)).toBe(true)
+  })
+
+  it('LEQ orders numerals', () => {
+    expect(alphaEquiv(normalize('LEQ TWO THREE').term, normalize('TRUE').term)).toBe(true)
+    expect(alphaEquiv(normalize('LEQ THREE TWO').term, normalize('FALSE').term)).toBe(true)
+  })
+
+  it('EQ tests numeric equality', () => {
+    expect(alphaEquiv(normalize('EQ TWO TWO').term, normalize('TRUE').term)).toBe(true)
+    expect(alphaEquiv(normalize('EQ ONE TWO').term, normalize('FALSE').term)).toBe(true)
+  })
+
+  it('XOR is exclusive or', () => {
+    expect(alphaEquiv(normalize('XOR TRUE TRUE').term, normalize('FALSE').term)).toBe(true)
+    expect(alphaEquiv(normalize('XOR TRUE FALSE').term, normalize('TRUE').term)).toBe(true)
+  })
 })
 
 describe('booleans and pairs', () => {

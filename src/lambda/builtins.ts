@@ -14,6 +14,7 @@ const SOURCES: [string, string][] = [
   ['NOT', '\\p. p FALSE TRUE'],
   ['AND', '\\p q. p q p'],
   ['OR', '\\p q. p p q'],
+  ['XOR', '\\p q. p (NOT q) q'],
   ['IF', '\\p a b. p a b'],
 
   // --- Church numerals ---
@@ -21,11 +22,16 @@ const SOURCES: [string, string][] = [
   ['ONE', '\\f x. f x'],
   ['TWO', '\\f x. f (f x)'],
   ['THREE', '\\f x. f (f (f x))'],
+  ['FOUR', '\\f x. f (f (f (f x)))'],
   ['SUCC', '\\n f x. f (n f x)'],
   ['PLUS', '\\m n f x. m f (n f x)'],
   ['MULT', '\\m n f. m (n f)'],
   ['POW', '\\b e. e b'],
+  ['PRED', '\\n f x. n (\\g h. h (g f)) (\\u. x) (\\u. u)'],
+  ['SUB', '\\m n. n PRED m'],
   ['ISZERO', '\\n. n (\\x. FALSE) TRUE'],
+  ['LEQ', '\\m n. ISZERO (SUB m n)'],
+  ['EQ', '\\m n. AND (LEQ m n) (LEQ n m)'],
 
   // --- Pairs ---
   ['PAIR', '\\x y f. f x y'],
