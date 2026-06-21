@@ -56,7 +56,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>λ Lambda Calculus Playground</h1>
+        <h1>Lambda Calculus Playground</h1>
         <p className="tagline">
           An interactive tool for learning the untyped lambda calculus — type a term,
           watch it reduce step by step.

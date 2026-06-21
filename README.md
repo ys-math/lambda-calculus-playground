@@ -1,10 +1,10 @@
-# λ Lambda Calculus Playground
+# Lambda Calculus Playground
 
 An interactive web app for **learning the untyped lambda calculus**. Type a term,
 watch it reduce one beta-step at a time with the active redex highlighted, and
 explore Church encodings — all rendered as proper math with [KaTeX](https://katex.org/).
 
-> **Live demo:** https://ys-math.github.io/lambda-calculator/
+> **Live demo:** https://ys-math.github.io/lambda-calculus-playground/
 > _(available once the first Pages deploy finishes)_
 
 ## Features
@@ -58,7 +58,7 @@ Pushing to `main` triggers [`.github/workflows/deploy.yml`](.github/workflows/de
 which runs the tests, builds, and publishes `dist/` to GitHub Pages. In your repo
 settings, set **Settings → Pages → Source** to **GitHub Actions**.
 
-The Vite `base` is set to `/lambda-calculator/` in `vite.config.ts`; if you rename the
+The Vite `base` is set to `/lambda-calculus-playground/` in `vite.config.ts`; if you rename the
 repository, update that value to match.
 
 ## License
