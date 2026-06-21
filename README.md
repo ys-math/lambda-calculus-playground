@@ -4,8 +4,8 @@ An interactive web app for **learning the untyped lambda calculus**. Type a term
 watch it reduce one beta-step at a time with the active redex highlighted, and
 explore Church encodings — all rendered as proper math with [KaTeX](https://katex.org/).
 
-> **Live demo:** `https://<your-username>.github.io/lambda-calculator/`
-> _(update this link after your first deploy)_
+> **Live demo:** https://ys-math.github.io/lambda-calculator/
+> _(available once the first Pages deploy finishes)_
 
 ## Features
 
