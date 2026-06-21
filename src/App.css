@@ -25,7 +25,12 @@
   grid-template-areas:
     'input    side'
     'controls side'
-    'result   side';
+    'result   side'
+    'filler   side';
+  /* The trailing 1fr row absorbs the height difference when the side column is
+     taller than the left column, so the input/controls/result cards stay packed
+     at the top with even gaps instead of being stretched apart. */
+  grid-template-rows: auto auto auto 1fr;
   gap: 18px 22px;
   align-items: start;
   margin-top: 24px;
@@ -40,6 +45,7 @@
 @media (max-width: 900px) {
   .workspace {
     grid-template-columns: 1fr;
+    grid-template-rows: none;
     /* Keep the definition/example buttons directly under the input. */
     grid-template-areas:
       'input'
