@@ -25,7 +25,9 @@ jobs:
         with:
           node-version: 20
           cache: npm
-      - run: npm ci
+      # `npm install` (not `npm ci`) tolerates the cross-platform optional
+      # native-dependency resolution differences in Vite's rolldown wasm binding.
+      - run: npm install --no-audit --no-fund
       - run: npm run test
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
