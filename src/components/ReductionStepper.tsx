@@ -4,6 +4,7 @@ import { toAscii, toLatex } from '../lambda/pretty'
 import { reduceMany } from '../lambda/reduce'
 import type { ConversionKind, Strategy } from '../lambda/reduce'
 import type { Term } from '../lambda/ast'
+import type { Recognizer } from '../lambda/recognize'
 
 interface ReductionStepperProps {
   term: Term
@@ -11,6 +12,7 @@ interface ReductionStepperProps {
   maxSteps: number
   eta: boolean
   showAlpha: boolean
+  recognizer: Recognizer
 }
 
 const KIND_LABEL: Record<ConversionKind, string> = {
@@ -28,6 +30,7 @@ export default function ReductionStepper({
   maxSteps,
   eta,
   showAlpha,
+  recognizer,
 }: ReductionStepperProps) {
   const result = useMemo(
     () => reduceMany(term, strategy, maxSteps, { eta, showAlpha }),
@@ -43,6 +46,10 @@ export default function ReductionStepper({
 
   const lastIndex = result.terms.length - 1
   const current = result.terms[index]
+
+  // Fold the current term back into a definition name / Church numeral, if any.
+  const recognition = useMemo(() => recognizer.recognize(current), [recognizer, current])
+  const hasRecognition = recognition.names.length > 0 || recognition.churchNumeral !== null
   // The step that turns terms[index] into terms[index + 1].
   const nextStep = index < lastIndex ? result.steps[index] : undefined
   // The step that produced the current term (for the "applied" label).
@@ -56,6 +63,20 @@ export default function ReductionStepper({
       <div className="stepper-display">
         <MathView latex={toLatex(current, nextStep?.redexPath)} display />
       </div>
+
+      {hasRecognition && (
+        <div className="recognition">
+          <span className="recognition-label">Recognized as</span>
+          {recognition.names.map((name) => (
+            <span key={name} className="recognition-name">{name}</span>
+          ))}
+          {recognition.churchNumeral !== null && (
+            <span className="recognition-num">
+              Church numeral {recognition.churchNumeral}
+            </span>
+          )}
+        </div>
+      )}
 
       <div className="stepper-controls">
         <button onClick={() => setIndex(0)} disabled={atStart} title="Reset to start">⏮</button>

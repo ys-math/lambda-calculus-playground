@@ -215,6 +215,39 @@
   overflow-x: auto;
 }
 
+/* "Recognized as" line: folds the current term back to known names/numerals. */
+.recognition {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+.recognition-label {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.recognition-name {
+  background: #e3f7ee;
+  color: #0b7a55;
+  border: 1px solid #bce8d6;
+  border-radius: 999px;
+  padding: 2px 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.recognition-num {
+  background: #e7edff;
+  color: #1b3bbb;
+  border: 1px solid #c4d2ff;
+  border-radius: 999px;
+  padding: 2px 12px;
+  font-size: 0.85rem;
+}
+
 .stepper-controls {
   display: flex;
   flex-wrap: wrap;

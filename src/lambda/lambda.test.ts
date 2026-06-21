@@ -5,8 +5,9 @@ import { alphaEquiv } from './ast'
 import type { Term } from './ast'
 import { reduceMany, stepOnce } from './reduce'
 import type { Strategy } from './reduce'
-import { builtinEnvironment } from './builtins'
+import { builtinEnvironment, BUILTIN_DEFINITIONS } from './builtins'
 import { expand, parseDefinition } from './environment'
+import { buildRecognizer, churchNumeral } from './recognize'
 
 // Parse helper that throws on error — convenient for tests.
 function p(src: string): Term {
@@ -159,6 +160,67 @@ describe('alpha conversion steps', () => {
     const a = withAlpha.terms[withAlpha.terms.length - 1]
     const b = without.terms[without.terms.length - 1]
     expect(alphaEquiv(a, b)).toBe(true)
+  })
+})
+
+describe('Church numeral detection', () => {
+  it('recognises numerals 0..3 regardless of variable names', () => {
+    expect(churchNumeral(p('\\f x. x'))).toBe(0)
+    expect(churchNumeral(p('\\g y. g y'))).toBe(1)
+    expect(churchNumeral(p('\\f x. f (f x)'))).toBe(2)
+    expect(churchNumeral(p('\\f x. f (f (f x))'))).toBe(3)
+  })
+
+  it('returns null for non-numerals', () => {
+    expect(churchNumeral(p('\\x. x'))).toBeNull() // identity, not a numeral
+    expect(churchNumeral(p('\\f x. x x'))).toBeNull()
+    expect(churchNumeral(p('a b'))).toBeNull()
+  })
+})
+
+describe('result recognition (folding)', () => {
+  const env = builtinEnvironment()
+  const rec = buildRecognizer(BUILTIN_DEFINITIONS, env)
+
+  // Recognise the β-normal form of a source expression.
+  const recognizeNF = (src: string) => {
+    const nf = reduceMany(expand(p(src), env), 'normal', 2000)
+    return rec.recognize(nf.terms[nf.terms.length - 1])
+  }
+
+  it('folds PLUS ONE ONE back to TWO', () => {
+    const r = recognizeNF('PLUS ONE ONE')
+    expect(r.names).toContain('TWO')
+    expect(r.churchNumeral).toBe(2)
+  })
+
+  it('recognises a numeral with no matching name (MULT TWO THREE = 6)', () => {
+    const r = recognizeNF('MULT TWO THREE')
+    expect(r.churchNumeral).toBe(6)
+  })
+
+  it('folds S K K back to the identity I', () => {
+    const r = recognizeNF('S K K')
+    expect(r.names).toContain('I')
+  })
+
+  it('recognises ZERO and FALSE as the same term', () => {
+    const r = recognizeNF('ZERO')
+    expect(r.names).toContain('ZERO')
+    expect(r.names).toContain('FALSE')
+  })
+
+  it('recognises a user definition that references built-ins', () => {
+    const userEnv = builtinEnvironment()
+    const six = parseDefinition('SIX = MULT TWO THREE')
+    if (!six.ok) throw new Error('bad def')
+    userEnv.set(six.name, six.term)
+    const recognizer = buildRecognizer(
+      [...BUILTIN_DEFINITIONS, { name: six.name, source: 'MULT TWO THREE', term: six.term }],
+      userEnv,
+    )
+    const nf = reduceMany(expand(p('MULT THREE TWO'), userEnv), 'normal', 2000)
+    expect(recognizer.recognize(nf.terms[nf.terms.length - 1]).names).toContain('SIX')
   })
 })
 

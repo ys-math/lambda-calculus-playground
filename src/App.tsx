@@ -11,6 +11,7 @@ import type { Strategy } from './lambda/reduce'
 import { builtinEnvironment, BUILTIN_DEFINITIONS } from './lambda/builtins'
 import { expand } from './lambda/environment'
 import type { Definition, Environment } from './lambda/environment'
+import { buildRecognizer } from './lambda/recognize'
 import './App.css'
 
 const STEP_CAP_OPTIONS = [50, 200, 1000]
@@ -29,6 +30,15 @@ export default function App() {
     for (const d of userDefs) e.set(d.name, d.term)
     return e
   }, [userDefs])
+
+  // Recognizer that folds a reduced term back into a definition name or numeral.
+  // Built-ins and user definitions are deduped by name (user wins).
+  const recognizer = useMemo(() => {
+    const byName = new Map<string, Definition>()
+    for (const d of BUILTIN_DEFINITIONS) byName.set(d.name, d)
+    for (const d of userDefs) byName.set(d.name, d)
+    return buildRecognizer([...byName.values()], env)
+  }, [userDefs, env])
 
   // Parse the current input, then expand macros so the stepper sees a closed term.
   const { term, expanded, error } = useMemo(() => {
@@ -100,6 +110,7 @@ export default function App() {
               maxSteps={maxSteps}
               eta={eta}
               showAlpha={showAlpha}
+              recognizer={recognizer}
             />
           ) : (
             <p className="empty-note">
