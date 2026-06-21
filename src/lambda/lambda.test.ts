@@ -121,6 +121,47 @@ describe('reduction strategies', () => {
   })
 })
 
+describe('eta reduction', () => {
+  it('reduces \\x. f x to f when eta is enabled', () => {
+    const r = reduceMany(p('\\x. f x'), 'normal', 100, { eta: true })
+    expect(alphaEquiv(r.terms[r.terms.length - 1], p('f'))).toBe(true)
+    expect(r.steps.some((s) => s.kind === 'eta')).toBe(true)
+  })
+
+  it('does NOT eta-reduce when the variable is free in the function', () => {
+    const r = reduceMany(p('\\x. x x'), 'normal', 100, { eta: true })
+    expect(r.status).toBe('normal')
+    expect(alphaEquiv(r.terms[r.terms.length - 1], p('\\x. x x'))).toBe(true)
+  })
+
+  it('leaves \\x. f x unchanged when eta is disabled (default)', () => {
+    const r = reduceMany(p('\\x. f x'), 'normal', 100)
+    expect(alphaEquiv(r.terms[r.terms.length - 1], p('\\x. f x'))).toBe(true)
+  })
+})
+
+describe('alpha conversion steps', () => {
+  it('emits an explicit alpha step before a capturing beta reduction', () => {
+    const r = reduceMany(p('(\\x y. x) y'), 'normal', 100, { showAlpha: true })
+    expect(r.steps.some((s) => s.kind === 'alpha')).toBe(true)
+    // The final result is still correct: the bound y was renamed, not captured.
+    expect(alphaEquiv(r.terms[r.terms.length - 1], p('\\z. y'))).toBe(true)
+  })
+
+  it('does not emit an alpha step when no capture would occur', () => {
+    const r = reduceMany(p('(\\x. x) y'), 'normal', 100, { showAlpha: true })
+    expect(r.steps.some((s) => s.kind === 'alpha')).toBe(false)
+  })
+
+  it('produces the same result with and without explicit alpha steps', () => {
+    const withAlpha = reduceMany(p('(\\x y. x) y'), 'normal', 100, { showAlpha: true })
+    const without = reduceMany(p('(\\x y. x) y'), 'normal', 100)
+    const a = withAlpha.terms[withAlpha.terms.length - 1]
+    const b = without.terms[without.terms.length - 1]
+    expect(alphaEquiv(a, b)).toBe(true)
+  })
+})
+
 describe('definitions', () => {
   it('parses a NAME = expr definition', () => {
     const d = parseDefinition('DOUBLE = \\f x. f (f x)')

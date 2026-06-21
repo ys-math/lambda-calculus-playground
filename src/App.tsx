@@ -19,6 +19,8 @@ export default function App() {
   const [input, setInput] = useState('(\\x. x x) (\\y. y)')
   const [strategy, setStrategy] = useState<Strategy>('normal')
   const [maxSteps, setMaxSteps] = useState(200)
+  const [eta, setEta] = useState(false)
+  const [showAlpha, setShowAlpha] = useState(true)
   const [userDefs, setUserDefs] = useState<Definition[]>([])
 
   // Build the active environment: built-ins overlaid with the user's definitions.
@@ -67,18 +69,38 @@ export default function App() {
 
           <div className="controls-row">
             <StrategyPicker value={strategy} onChange={setStrategy} />
-            <label className="cap-picker">
-              Step cap
-              <select value={maxSteps} onChange={(e) => setMaxSteps(Number(e.target.value))}>
-                {STEP_CAP_OPTIONS.map((n) => (
-                  <option key={n} value={n}>{n}</option>
-                ))}
-              </select>
-            </label>
+            <div className="controls-stack">
+              <label className="cap-picker">
+                Step cap
+                <select value={maxSteps} onChange={(e) => setMaxSteps(Number(e.target.value))}>
+                  {STEP_CAP_OPTIONS.map((n) => (
+                    <option key={n} value={n}>{n}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="toggle" title="λx. M x → M when x is not free in M">
+                <input type="checkbox" checked={eta} onChange={(e) => setEta(e.target.checked)} />
+                Include η-reduction
+              </label>
+              <label className="toggle" title="Rename bound variables explicitly before a capturing β-step">
+                <input
+                  type="checkbox"
+                  checked={showAlpha}
+                  onChange={(e) => setShowAlpha(e.target.checked)}
+                />
+                Show α-conversion steps
+              </label>
+            </div>
           </div>
 
           {expanded ? (
-            <ReductionStepper term={expanded} strategy={strategy} maxSteps={maxSteps} />
+            <ReductionStepper
+              term={expanded}
+              strategy={strategy}
+              maxSteps={maxSteps}
+              eta={eta}
+              showAlpha={showAlpha}
+            />
           ) : (
             <p className="empty-note">
               Enter a valid expression above to start reducing.
@@ -100,8 +122,8 @@ export default function App() {
 
       <footer className="app-footer">
         <p>
-          {BUILTIN_DEFINITIONS.length} built-in definitions · Normal &amp; applicative order ·
-          Built with React, TypeScript &amp; KaTeX
+          {BUILTIN_DEFINITIONS.length} built-in definitions · β / η / α conversions ·
+          Normal &amp; applicative order · Built with React, TypeScript &amp; KaTeX
         </p>
       </footer>
     </div>

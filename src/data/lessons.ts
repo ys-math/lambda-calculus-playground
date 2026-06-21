@@ -68,8 +68,34 @@ export const LESSONS: Lesson[] = [
     ],
   },
   {
+    id: 'conversions',
+    title: '3. α-conversion and η-reduction',
+    blocks: [
+      {
+        kind: 'p',
+        text:
+          'Beta reduction is not the only rewrite rule. α-conversion renames a bound variable — λx. x and λy. y are the same function. It is needed when a substitution would otherwise capture a free variable. Turn on "Show α-conversion steps" and reduce the term below: the bound y is renamed before the β-step.',
+      },
+      {
+        kind: 'math',
+        latex: '(\\lambda x\\, y.\\; x)\\; y \\;\\xrightarrow{\\;\\alpha\\;}\\; (\\lambda x\\, y\'.\\; x)\\; y \\;\\xrightarrow{\\;\\beta\\;}\\; \\lambda y\'.\\; y',
+      },
+      { kind: 'try', expr: '(\\x y. x) y', caption: 'Watch α-conversion avoid capture' },
+      {
+        kind: 'p',
+        text:
+          'η-reduction says a function that just passes its argument straight through is redundant: λx. (M x) reduces to M whenever x does not appear in M. Enable "Include η-reduction" and reduce this:',
+      },
+      {
+        kind: 'math',
+        latex: '\\lambda x.\\; f\\; x \\;\\xrightarrow{\\;\\eta\\;}\\; f',
+      },
+      { kind: 'try', expr: '\\x. f x', caption: 'η-reduce λx. f x to f' },
+    ],
+  },
+  {
     id: 'strategies',
-    title: '3. Reduction strategies',
+    title: '4. Reduction strategies',
     blocks: [
       {
         kind: 'p',
@@ -86,7 +112,7 @@ export const LESSONS: Lesson[] = [
   },
   {
     id: 'booleans',
-    title: '4. Church booleans',
+    title: '5. Church booleans',
     blocks: [
       {
         kind: 'p',
@@ -103,7 +129,7 @@ export const LESSONS: Lesson[] = [
   },
   {
     id: 'numerals',
-    title: '5. Church numerals',
+    title: '6. Church numerals',
     blocks: [
       {
         kind: 'p',
@@ -121,7 +147,7 @@ export const LESSONS: Lesson[] = [
   },
   {
     id: 'fixpoint',
-    title: '6. Recursion and the Y combinator',
+    title: '7. Recursion and the Y combinator',
     blocks: [
       {
         kind: 'p',

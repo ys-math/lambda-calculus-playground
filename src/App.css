@@ -38,6 +38,7 @@
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 14px;
+  box-shadow: var(--card-shadow);
 }
 
 .playground {
@@ -155,10 +156,17 @@
   font-size: 0.78rem;
 }
 
-.cap-picker {
+.controls-stack {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
+  min-width: 220px;
+}
+
+.cap-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 0.9rem;
   font-weight: 600;
 }
@@ -168,7 +176,22 @@
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 8px 10px;
+  padding: 6px 10px;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.toggle input {
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
 }
 
 /* Stepper ----------------------------------------------------------------- */
@@ -212,7 +235,7 @@
 
 .stepper-controls button:hover:not(:disabled) {
   border-color: var(--accent);
-  background: #232a38;
+  background: #eef1fb;
 }
 
 .stepper-controls button:disabled {
@@ -238,11 +261,45 @@
 }
 
 .status-capped {
-  color: #ffcf6b;
+  color: #9a6b00;
 }
 
-.status-active {
+.status-next {
   color: var(--muted);
+}
+
+/* Conversion-kind badges (β / η / α) shown per step. */
+.kind-badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  border: 1px solid transparent;
+}
+
+.kind-beta {
+  background: #e7edff;
+  color: #1b3bbb;
+  border-color: #c4d2ff;
+}
+
+.kind-eta {
+  background: #e3f7ee;
+  color: #0b7a55;
+  border-color: #bce8d6;
+}
+
+.kind-alpha {
+  background: #fff2d6;
+  color: #8a5a00;
+  border-color: #ffe1a6;
+}
+
+.kind-note {
+  color: var(--text);
+  font-family: 'JetBrains Mono', 'SF Mono', ui-monospace, Menlo, monospace;
+  font-size: 0.85em;
 }
 
 .ascii-out {
@@ -411,7 +468,7 @@
 }
 
 .lesson-body p {
-  color: #cfd6e4;
+  color: #333a45;
   font-size: 0.92rem;
 }
 
