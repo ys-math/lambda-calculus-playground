@@ -24,11 +24,11 @@
   grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
   grid-template-areas:
     'input    side'
-    'controls side'
     'result   side'
+    'controls side'
     'filler   side';
   /* The trailing 1fr row absorbs the height difference when the side column is
-     taller than the left column, so the input/controls/result cards stay packed
+     taller than the left column, so the input/result/controls cards stay packed
      at the top with even gaps instead of being stretched apart. */
   grid-template-rows: auto auto auto 1fr;
   gap: 18px 22px;
@@ -42,16 +42,26 @@
 .workspace > .empty-note { grid-area: result; }
 .workspace > .ws-side { grid-area: side; }
 
+/* Let every workspace cell shrink to its track. Grid items default to
+   min-width: auto, which can let a wide result line push a cell past the
+   viewport; min-width: 0 keeps the overflow inside the scrolling result box. */
+.workspace > * {
+  min-width: 0;
+}
+
 @media (max-width: 900px) {
   .workspace {
-    grid-template-columns: 1fr;
+    /* minmax(0, 1fr) lets the single column shrink to the viewport; a plain
+       1fr track has an implicit min-width of auto, so a very wide result line
+       could stretch the track past the screen and shrink the whole page. */
+    grid-template-columns: minmax(0, 1fr);
     grid-template-rows: none;
-    /* Keep the definition/example buttons directly under the input. */
+    /* Result sits directly under the input on narrow screens too. */
     grid-template-areas:
       'input'
-      'side'
+      'result'
       'controls'
-      'result';
+      'side';
   }
 }
 
