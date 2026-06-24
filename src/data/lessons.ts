@@ -370,6 +370,70 @@ export const LESSONS: Lesson[] = [
     ],
   },
   {
+    id: 'typed-derivation',
+    section: 'typed',
+    title: 'Reading the typing derivation',
+    blocks: [
+      {
+        kind: 'p',
+        text:
+          'When Typed mode infers a type it draws a typing derivation — a proof tree. Each row is a judgment Γ ⊢ M : T, read “in the context Γ, the term M has type T.” The context Γ lists the type assumed for every variable currently in scope.',
+      },
+      {
+        kind: 'math',
+        latex: 'f {:}\\, a \\to b,\\; x {:}\\, a \\;\\vdash\\; f\\, x : b',
+      },
+      {
+        kind: 'p',
+        text:
+          'Read the tree from the bottom up. The conclusion — the term you asked about — sits under the bottom bar; above each bar are the premises it needs, and the rule name on the right says which typing rule justifies that step. The leaves are var steps: a variable’s type read straight out of the context, with nothing above the bar.',
+      },
+      {
+        kind: 'math',
+        latex: '\\dfrac{\\;}{\\Gamma,\\, x{:}A \\vdash x : A}\\;(\\mathsf{var})',
+      },
+      {
+        kind: 'p',
+        text:
+          'Here is the whole derivation for the identity — one var leaf, wrapped by one →I step. To type λx. x we use →I, which needs the body typed with x : a in scope; that body is a var leaf giving x : a. The result is a → a.',
+      },
+      {
+        kind: 'math',
+        latex:
+          '\\dfrac{\\dfrac{\\;}{x {:}\\, a \\vdash x : a}\\;(\\mathsf{var})}{\\vdash \\lambda x.\\, x : a \\to a}\\;({\\to}\\mathsf{I})',
+      },
+      { kind: 'try', expr: '\\x. x', caption: 'See the identity’s derivation' },
+    ],
+  },
+  {
+    id: 'typed-derivation-app',
+    section: 'typed',
+    title: 'A bigger derivation: application',
+    blocks: [
+      {
+        kind: 'p',
+        text:
+          'Application is typed with the →E rule, which has two premises — the function and its argument. →E checks that the function’s input type matches the argument’s type, and the conclusion is the function’s output type.',
+      },
+      {
+        kind: 'math',
+        latex:
+          '\\dfrac{\\dfrac{\\;}{f {:}\\, a \\to b,\\, x {:}\\, a \\vdash f : a \\to b}\\;(\\mathsf{var}) \\qquad \\dfrac{\\;}{f {:}\\, a \\to b,\\, x {:}\\, a \\vdash x : a}\\;(\\mathsf{var})}{f {:}\\, a \\to b,\\, x {:}\\, a \\vdash f\\, x : b}\\;({\\to}\\mathsf{E})',
+      },
+      {
+        kind: 'p',
+        text:
+          'Both premises here are var leaves: from the context f : a → b and x : a. →E matches the function’s input a against the argument’s type a and concludes f x : b.',
+      },
+      {
+        kind: 'p',
+        text:
+          'Now wrap that in the two binders λf. λx. … — each adds an →I step that discharges one assumption from the context, giving the full type (a → b) → a → b. Load it and read the whole tree, bottom row first:',
+      },
+      { kind: 'try', expr: '\\f x. f x', caption: 'Read the full application derivation' },
+    ],
+  },
+  {
     id: 'typed-functions',
     section: 'typed',
     title: 'Reading function types',

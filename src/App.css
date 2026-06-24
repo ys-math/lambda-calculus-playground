@@ -780,6 +780,8 @@
   display: block;
   margin: 10px 0;
   text-align: center;
+  /* Wide derivation trees scroll horizontally instead of overflowing the card. */
+  overflow-x: auto;
 }
 
 .try-btn {
