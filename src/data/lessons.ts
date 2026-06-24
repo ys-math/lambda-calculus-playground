@@ -298,4 +298,38 @@ export const LESSONS: Lesson[] = [
       { kind: 'try', expr: 'Y g', caption: 'Watch Y g unfold (use the step cap)' },
     ],
   },
+  {
+    id: 'types',
+    title: '13. Simple types and inference',
+    blocks: [
+      {
+        kind: 'p',
+        text:
+          'Flip the Untyped / Typed switch at the top to enter typed mode. There the app infers each term’s simplest type and draws the typing derivation. A simple type is either a type variable (a, b, …) or a function type A → B.',
+      },
+      {
+        kind: 'p',
+        text:
+          'Two rules do all the work: →I types a function by typing its body with the parameter in scope, and →E types an application by matching the function’s input type to the argument.',
+      },
+      {
+        kind: 'math',
+        latex:
+          '\\dfrac{\\Gamma,\\, x{:}A \\vdash M : B}{\\Gamma \\vdash \\lambda x.\\,M : A \\to B}\\;({\\to}\\mathsf{I}) \\qquad \\dfrac{\\Gamma \\vdash M : A \\to B \\quad \\Gamma \\vdash N : A}{\\Gamma \\vdash M\\,N : B}\\;({\\to}\\mathsf{E})',
+      },
+      {
+        kind: 'p',
+        text:
+          'Every typable term has a most general (principal) type. The identity works at any type, so it gets a → a. Turn on Typed mode and load these:',
+      },
+      { kind: 'try', expr: '\\x. x', caption: 'Type the identity (a → a)' },
+      { kind: 'try', expr: '\\f x. f x', caption: 'Type application ((a → b) → a → b)' },
+      {
+        kind: 'p',
+        text:
+          'But not every untyped term is typable. Self-application λx. x x would need x to be both a and a → b at once — impossible with finite types (the occurs check fails). This is exactly why the untyped Y combinator and Ω have no simple type.',
+      },
+      { kind: 'try', expr: '\\x. x x', caption: 'See why λx. x x has no simple type' },
+    ],
+  },
 ]

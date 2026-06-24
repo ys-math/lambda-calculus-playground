@@ -5,6 +5,7 @@ import StrategyPicker from './components/StrategyPicker'
 import Definitions from './components/Definitions'
 import Examples from './components/Examples'
 import SavedFormulas from './components/SavedFormulas'
+import TypePanel from './components/TypePanel'
 import Lessons from './components/Lessons'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import { addFormula, removeFormula } from './lib/savedFormulas'
@@ -16,6 +17,7 @@ import { builtinEnvironment, BUILTIN_DEFINITIONS } from './lambda/builtins'
 import { expand } from './lambda/environment'
 import type { Definition, Environment } from './lambda/environment'
 import { buildRecognizer } from './lambda/recognize'
+import { infer } from './lambda/infer'
 import './App.css'
 
 const STEP_CAP_OPTIONS = [50, 200, 1000]
@@ -27,6 +29,8 @@ export default function App() {
   const [eta, setEta] = useState(false)
   const [showAlpha, setShowAlpha] = useState(true)
   const [userDefs, setUserDefs] = useState<Definition[]>([])
+  // Typed mode (Simply Typed λ-calculus) persists across sessions.
+  const [typed, setTyped] = useLocalStorage<boolean>('lambda-playground:typed-mode', false)
   // Saved formulas persist across sessions in localStorage.
   const [savedFormulas, setSavedFormulas] = useLocalStorage<string[]>(
     'lambda-playground:saved-formulas',
@@ -62,6 +66,13 @@ export default function App() {
     return { term: parsed.term, expanded: expand(parsed.term, env), error: null }
   }, [input, env])
 
+  // In typed mode, infer the simple type of the raw term (macros are treated as
+  // free variables, not expanded).
+  const typeResult = useMemo(
+    () => (typed && term ? infer(term) : null),
+    [typed, term],
+  )
+
   const addDef = (def: Definition) => {
     setUserDefs((defs) => [...defs.filter((d) => d.name !== def.name), def])
   }
@@ -81,10 +92,29 @@ export default function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Lambda Calculus Playground</h1>
+        <div className="header-row">
+          <h1>Lambda Calculus Playground</h1>
+          <div className="mode-toggle" role="group" aria-label="Calculus mode">
+            <button
+              className={typed ? '' : 'active'}
+              aria-pressed={!typed}
+              onClick={() => setTyped(false)}
+            >
+              Untyped
+            </button>
+            <button
+              className={typed ? 'active' : ''}
+              aria-pressed={typed}
+              onClick={() => setTyped(true)}
+            >
+              Typed
+            </button>
+          </div>
+        </div>
         <p className="tagline">
-          An interactive tool for learning the untyped lambda calculus — type a term,
-          watch it reduce step by step.
+          {typed
+            ? 'Typed mode infers each term’s simple type and shows the typing derivation — reduction still runs alongside.'
+            : 'An interactive tool for learning the untyped lambda calculus — type a term, watch it reduce step by step.'}
         </p>
       </header>
 
@@ -116,6 +146,8 @@ export default function App() {
             </label>
           </div>
         </div>
+
+        {typed && term && typeResult && <TypePanel term={term} result={typeResult} />}
 
         {expanded ? (
           <ReductionStepper

@@ -4,6 +4,14 @@
   padding: 28px 20px 60px;
 }
 
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
 .app-header h1 {
   margin: 0 0 6px;
   font-size: 1.9rem;
@@ -11,9 +19,92 @@
 }
 
 .tagline {
-  margin: 0;
+  margin: 6px 0 0;
   color: var(--muted);
   max-width: 60ch;
+}
+
+/* Segmented Untyped | Typed mode switch. */
+.mode-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--panel);
+  box-shadow: var(--card-shadow);
+}
+
+.mode-toggle button {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 8px 18px;
+  transition: background 0.12s, color 0.12s;
+}
+
+.mode-toggle button + button {
+  border-left: 1px solid var(--border);
+}
+
+.mode-toggle button.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.mode-toggle button:not(.active):hover {
+  color: var(--text);
+  background: var(--panel-2);
+}
+
+/* Typing panel ------------------------------------------------------------ */
+
+.typing {
+  padding: 18px;
+}
+
+.typing h2 {
+  margin: 0 0 10px;
+  font-size: 1.2rem;
+}
+
+.type-headline {
+  padding: 12px 14px;
+  background: var(--panel-2);
+  border-radius: 10px;
+  text-align: center;
+  overflow-x: auto;
+}
+
+.type-error {
+  padding: 12px 14px;
+  background: #fdecec;
+  border: 1px solid #f4c7c7;
+  border-radius: 10px;
+  color: var(--error);
+  font-weight: 600;
+}
+
+.derivation-wrap {
+  margin-top: 12px;
+}
+
+.derivation-wrap summary {
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* Fixed max height + scroll so a big proof tree never resizes the page. */
+.derivation {
+  margin-top: 10px;
+  max-height: 320px;
+  overflow: auto;
+  padding: 14px;
+  background: var(--panel-2);
+  border-radius: 10px;
 }
 
 /* Workspace: input + reduction controls + result in the main column, with the
@@ -25,12 +116,13 @@
   grid-template-areas:
     'input    side'
     'result   side'
+    'typing   side'
     'controls side'
     'filler   side';
   /* The trailing 1fr row absorbs the height difference when the side column is
-     taller than the left column, so the input/result/controls cards stay packed
-     at the top with even gaps instead of being stretched apart. */
-  grid-template-rows: auto auto auto 1fr;
+     taller than the left column, so the input/result/typing/controls cards stay
+     packed at the top with even gaps instead of being stretched apart. */
+  grid-template-rows: auto auto auto auto 1fr;
   gap: 18px 22px;
   align-items: start;
   margin-top: 24px;
@@ -38,6 +130,7 @@
 
 .workspace > .term-input { grid-area: input; }
 .workspace > .controls-row { grid-area: controls; }
+.workspace > .typing { grid-area: typing; }
 .workspace > .stepper,
 .workspace > .empty-note { grid-area: result; }
 .workspace > .ws-side { grid-area: side; }
@@ -60,6 +153,7 @@
     grid-template-areas:
       'input'
       'result'
+      'typing'
       'controls'
       'side';
   }
@@ -79,6 +173,7 @@
 .saved,
 .lessons,
 .controls-row,
+.typing,
 .stepper {
   background: var(--panel);
   border: 1px solid var(--border);
