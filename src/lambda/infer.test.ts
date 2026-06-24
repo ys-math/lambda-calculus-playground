@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
+import katex from 'katex'
 import { parse } from './parser'
-import { infer } from './infer'
+import { infer, derivationToLatex } from './infer'
 import { typeToAscii, tVar, tArrow } from './types'
 import { unify } from './unify'
 
@@ -53,6 +54,23 @@ describe('type inference', () => {
 
   it('rejects the diverging combinator term', () => {
     expect(typable('(\\x. x x) (\\y. y)')).toBe(false)
+  })
+})
+
+describe('derivation renders as valid KaTeX', () => {
+  // Guards against unsupported KaTeX commands (e.g. \strut) sneaking into the
+  // derivation LaTeX. strict:'error' turns questionable usage into a throw.
+  it('renders every rule shape without errors', () => {
+    for (const src of ['\\x. x', '\\f x. f x', '\\x y. x', 'f (g x)', 'PLUS ONE ONE']) {
+      const p = parse(src)
+      if (!p.ok) throw new Error(`parse failed: ${src}`)
+      const r = infer(p.term)
+      if (!r.ok) throw new Error(`expected typable: ${src}`)
+      const latex = derivationToLatex(r.derivation, r.names)
+      expect(() =>
+        katex.renderToString(latex, { throwOnError: true, strict: 'error' }),
+      ).not.toThrow()
+    }
   })
 })
 

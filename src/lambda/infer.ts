@@ -153,7 +153,9 @@ export function derivationToLatex(d: Derivation, names: NameMap): string {
   const concl = judgmentToLatex(d.judgment, names)
   const label = `\\;(${RULE_LABEL[d.rule]})`
   if (d.premises.length === 0) {
-    return `\\dfrac{\\strut}{${concl}}${label}`
+    // Axiom: a rule bar over the conclusion with an empty (thin-space) numerator.
+    // (KaTeX has no \strut, so use \; for a little vertical breathing room.)
+    return `\\dfrac{\\;}{${concl}}${label}`
   }
   const top = d.premises.map((p) => derivationToLatex(p, names)).join('\\qquad ')
   return `\\dfrac{${top}}{${concl}}${label}`
