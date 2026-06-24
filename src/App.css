@@ -721,11 +721,29 @@
   padding: 20px;
 }
 
+/* Each lesson section (Untyped / Typed) gets a header + description. */
+.lesson-section {
+  margin-top: 18px;
+}
+
+.lesson-section h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--border);
+}
+
+.lesson-section-desc {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
 .lesson-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin: 10px 0 20px;
+  margin: 12px 0 8px;
 }
 
 .lesson {

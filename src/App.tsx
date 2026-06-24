@@ -182,7 +182,7 @@ export default function App() {
         </aside>
       </div>
 
-      <Lessons onLoad={setInput} />
+      <Lessons onLoad={setInput} onSelectMode={setTyped} />
 
       <footer className="app-footer">
         <p>

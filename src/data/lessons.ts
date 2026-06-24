@@ -1,22 +1,29 @@
-// Ordered guided lessons. Each lesson is a sequence of blocks: prose paragraphs,
-// inline-math snippets, and "try it" buttons that load an expression into the
-// playground.
+// Ordered guided lessons, split into two sections: untyped and typed lambda
+// calculus. Each lesson is a sequence of blocks: prose paragraphs, inline-math
+// snippets, and "try it" buttons that load an expression into the playground.
+//
+// Titles carry no numbers — the Learn panel numbers lessons per section.
 
 export type LessonBlock =
   | { kind: 'p'; text: string }
   | { kind: 'math'; latex: string }
   | { kind: 'try'; expr: string; caption: string }
 
+export type LessonSection = 'untyped' | 'typed'
+
 export interface Lesson {
   id: string
+  section: LessonSection
   title: string
   blocks: LessonBlock[]
 }
 
 export const LESSONS: Lesson[] = [
+  // ===================== Untyped lambda calculus =====================
   {
     id: 'intro',
-    title: '1. What is lambda calculus?',
+    section: 'untyped',
+    title: 'What is lambda calculus?',
     blocks: [
       {
         kind: 'p',
@@ -42,7 +49,8 @@ export const LESSONS: Lesson[] = [
   },
   {
     id: 'variables',
-    title: '2. Variables: free and bound',
+    section: 'untyped',
+    title: 'Variables: free and bound',
     blocks: [
       {
         kind: 'p',
@@ -72,7 +80,8 @@ export const LESSONS: Lesson[] = [
   },
   {
     id: 'beta',
-    title: '3. Beta reduction',
+    section: 'untyped',
+    title: 'Beta reduction',
     blocks: [
       {
         kind: 'p',
@@ -99,7 +108,8 @@ export const LESSONS: Lesson[] = [
   },
   {
     id: 'currying',
-    title: '4. Currying and multiple arguments',
+    section: 'untyped',
+    title: 'Currying and multiple arguments',
     blocks: [
       {
         kind: 'p',
@@ -126,7 +136,8 @@ export const LESSONS: Lesson[] = [
   },
   {
     id: 'conversions',
-    title: '5. α-conversion and η-reduction',
+    section: 'untyped',
+    title: 'α-conversion and η-reduction',
     blocks: [
       {
         kind: 'p',
@@ -152,7 +163,8 @@ export const LESSONS: Lesson[] = [
   },
   {
     id: 'strategies',
-    title: '6. Reduction strategies',
+    section: 'untyped',
+    title: 'Reduction strategies',
     blocks: [
       {
         kind: 'p',
@@ -168,8 +180,31 @@ export const LESSONS: Lesson[] = [
     ],
   },
   {
+    id: 'confluence',
+    section: 'untyped',
+    title: 'Confluence (Church–Rosser)',
+    blocks: [
+      {
+        kind: 'p',
+        text:
+          'A term can have several redexes, and different strategies reduce them in different orders. The Church–Rosser theorem guarantees this never changes the destination: if a term has a normal form, that normal form is unique.',
+      },
+      {
+        kind: 'math',
+        latex: '(\\lambda x\\, y.\\; x)\\;((\\lambda z.\\, z)\\, p)\\; q \\;\\longrightarrow^{*}\\; p',
+      },
+      {
+        kind: 'p',
+        text:
+          'Below, the inner (λz. z) p could be reduced first, or the outer application — both routes meet at p. Switch the strategy selector and confirm both reach the same result:',
+      },
+      { kind: 'try', expr: '(\\x y. x) ((\\z. z) p) q', caption: 'Reduce two ways — both give p' },
+    ],
+  },
+  {
     id: 'combinators',
-    title: '7. Combinators: S, K, I',
+    section: 'untyped',
+    title: 'Combinators: S, K, I',
     blocks: [
       {
         kind: 'p',
@@ -196,7 +231,8 @@ export const LESSONS: Lesson[] = [
   },
   {
     id: 'booleans',
-    title: '8. Church booleans',
+    section: 'untyped',
+    title: 'Church booleans',
     blocks: [
       {
         kind: 'p',
@@ -214,7 +250,8 @@ export const LESSONS: Lesson[] = [
   },
   {
     id: 'numerals',
-    title: '9. Church numerals',
+    section: 'untyped',
+    title: 'Church numerals',
     blocks: [
       {
         kind: 'p',
@@ -233,7 +270,8 @@ export const LESSONS: Lesson[] = [
   },
   {
     id: 'pairs',
-    title: '10. Pairs and data structures',
+    section: 'untyped',
+    title: 'Pairs and data structures',
     blocks: [
       {
         kind: 'p',
@@ -255,7 +293,8 @@ export const LESSONS: Lesson[] = [
   },
   {
     id: 'subtraction',
-    title: '11. Subtraction and comparison',
+    section: 'untyped',
+    title: 'Subtraction and comparison',
     blocks: [
       {
         kind: 'p',
@@ -279,7 +318,8 @@ export const LESSONS: Lesson[] = [
   },
   {
     id: 'fixpoint',
-    title: '12. Recursion and the Y combinator',
+    section: 'untyped',
+    title: 'Recursion and the Y combinator',
     blocks: [
       {
         kind: 'p',
@@ -298,14 +338,17 @@ export const LESSONS: Lesson[] = [
       { kind: 'try', expr: 'Y g', caption: 'Watch Y g unfold (use the step cap)' },
     ],
   },
+
+  // ===================== Typed lambda calculus =====================
   {
     id: 'types',
-    title: '13. Simple types and inference',
+    section: 'typed',
+    title: 'Simple types and inference',
     blocks: [
       {
         kind: 'p',
         text:
-          'Flip the Untyped / Typed switch at the top to enter typed mode. There the app infers each term’s simplest type and draws the typing derivation. A simple type is either a type variable (a, b, …) or a function type A → B.',
+          'These lessons cover Typed mode. Loading any example here switches the app into Typed mode, where it infers the term’s simplest type and draws the typing derivation. A simple type is either a type variable (a, b, …) or a function type A → B.',
       },
       {
         kind: 'p',
@@ -320,16 +363,146 @@ export const LESSONS: Lesson[] = [
       {
         kind: 'p',
         text:
-          'Every typable term has a most general (principal) type. The identity works at any type, so it gets a → a. Turn on Typed mode and load these:',
+          'Every typable term has a most general (principal) type. The identity works at any type, so it gets a → a. Load these and watch the derivation build:',
       },
       { kind: 'try', expr: '\\x. x', caption: 'Type the identity (a → a)' },
       { kind: 'try', expr: '\\f x. f x', caption: 'Type application ((a → b) → a → b)' },
+    ],
+  },
+  {
+    id: 'typed-functions',
+    section: 'typed',
+    title: 'Reading function types',
+    blocks: [
       {
         kind: 'p',
         text:
-          'But not every untyped term is typable. Self-application λx. x x would need x to be both a and a → b at once — impossible with finite types (the occurs check fails). This is exactly why the untyped Y combinator and Ω have no simple type.',
+          'A term’s type mirrors its structure. The constant function takes an a and a b and returns the a, so it has type a → b → a. Arrows associate to the right, so this means a → (b → a).',
       },
-      { kind: 'try', expr: '\\x. x x', caption: 'See why λx. x x has no simple type' },
+      {
+        kind: 'math',
+        latex: '\\text{K} = \\lambda x\\, y.\\; x \\;:\\; a \\to b \\to a',
+      },
+      { kind: 'try', expr: '\\x y. x', caption: 'Type K (a → b → a)' },
+      {
+        kind: 'p',
+        text:
+          'Composition feeds its input through g and then f. Its type threads three variables — an a → b, a c → a, and a c — producing b. Note the parentheses: an arrow on the left of another arrow must be parenthesised, because → is right-associative.',
+      },
+      {
+        kind: 'math',
+        latex: '\\lambda f\\, g\\, x.\\; f\\,(g\\, x) \\;:\\; (a \\to b) \\to (c \\to a) \\to c \\to b',
+      },
+      { kind: 'try', expr: '\\f g x. f (g x)', caption: 'Type composition' },
+    ],
+  },
+  {
+    id: 'typed-occurs',
+    section: 'typed',
+    title: 'When typing fails: the occurs check',
+    blocks: [
+      {
+        kind: 'p',
+        text:
+          'Not every untyped term has a simple type. To type self-application λx. x x, the application x x forces x to be both a function a → b and its own argument a — that is, a = a → b. No finite type satisfies that, so inference fails the occurs check.',
+      },
+      {
+        kind: 'math',
+        latex: 'x : a \\quad\\Longrightarrow\\quad x\\, x \\text{ needs } a = a \\to b \\;\\; (\\text{impossible})',
+      },
+      { kind: 'try', expr: '\\x. x x', caption: 'λx. x x — not simply typable' },
+      {
+        kind: 'p',
+        text:
+          'This is the whole point of types: the paradoxical terms behind Ω and the Y combinator are exactly the ones simple types reject. Their untyped versions still run fine in Untyped mode.',
+      },
+      { kind: 'try', expr: '(\\x. x x) (\\y. y)', caption: 'An Ω-style term — also untypable' },
+    ],
+  },
+  {
+    id: 'typed-termination',
+    section: 'typed',
+    title: 'Typed terms always terminate',
+    blocks: [
+      {
+        kind: 'p',
+        text:
+          'A landmark theorem — strong normalization — says every simply typed term reduces to a normal form, no matter which strategy you use. Typed lambda calculus simply cannot loop forever.',
+      },
+      {
+        kind: 'p',
+        text:
+          'So you can never build Ω or an endless Y-unfolding out of typable pieces. Here is a typable term: it has a type and it terminates.',
+      },
+      { kind: 'try', expr: '(\\f x. f x) g a', caption: 'Typable and terminating (type b)' },
+      {
+        kind: 'p',
+        text:
+          'By contrast, the looping shapes from Untyped mode have no type at all — here, termination and typability go hand in hand.',
+      },
+      { kind: 'try', expr: '\\x. x x', caption: 'The non-terminating shape is untypable' },
+    ],
+  },
+  {
+    id: 'typed-encodings',
+    section: 'typed',
+    title: 'Typing the encodings',
+    blocks: [
+      {
+        kind: 'p',
+        text:
+          'The Church encodings are typable too. Because Typed mode types a term exactly as written, load the expanded lambda forms here (not the names TRUE, TWO, …).',
+      },
+      {
+        kind: 'p',
+        text:
+          'TRUE picks the first of two arguments, so it has type a → b → a — the very same type as K.',
+      },
+      {
+        kind: 'math',
+        latex: '\\lambda x\\, y.\\; x \\;:\\; a \\to b \\to a',
+      },
+      { kind: 'try', expr: '\\x y. x', caption: 'TRUE / K : a → b → a' },
+      {
+        kind: 'p',
+        text:
+          'A Church numeral applies f to x some number of times. For n ≥ 1 every numeral has type (a → a) → a → a — a function and a starting value:',
+      },
+      {
+        kind: 'math',
+        latex: '\\lambda f\\, x.\\; f\\,(f\\, x) \\;:\\; (a \\to a) \\to a \\to a',
+      },
+      { kind: 'try', expr: '\\f x. f (f x)', caption: 'TWO : (a → a) → a → a' },
+      { kind: 'try', expr: '\\f x. f (f (f x))', caption: 'THREE : the same type' },
+      {
+        kind: 'p',
+        text:
+          'ZERO and ONE have more general principal types (their f need not be used, or used only once), but they can all be used at this common numeral type (a → a) → a → a.',
+      },
+    ],
+  },
+  {
+    id: 'typed-curry-howard',
+    section: 'typed',
+    title: 'Curry–Howard: types are propositions',
+    blocks: [
+      {
+        kind: 'p',
+        text:
+          'Read → as logical implication and a remarkable correspondence appears: a type is a proposition, and a term of that type is a proof of it. This is the Curry–Howard correspondence.',
+      },
+      {
+        kind: 'p',
+        text:
+          'The identity proves a → a (anything implies itself). K proves a → b → a. And the →I and →E rules are exactly implication-introduction and modus ponens from logic — the typing derivation is a proof tree.',
+      },
+      {
+        kind: 'math',
+        latex: 'I : a \\to a \\qquad K : a \\to b \\to a \\qquad S : (a \\to b \\to c) \\to (a \\to b) \\to a \\to c',
+      },
+      { kind: 'try', expr: '\\x. x', caption: 'Proof of a → a' },
+      { kind: 'try', expr: '\\x y. x', caption: 'Proof of a → b → a' },
+      { kind: 'try', expr: '\\f g x. f x (g x)', caption: 'Proof of the S axiom' },
     ],
   },
 ]
