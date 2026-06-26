@@ -1,13 +1,21 @@
-// Substitution and beta-normalisation for the Calculus of Constructions.
+// Substitution and beta/delta-normalisation for the Calculus of Constructions.
 //
 // Type-checking a dependently typed term needs to *compute*: to compare two
-// types we reduce both to normal form and check them up to renaming. Because
-// well-typed CoC terms are strongly normalising, normalisation terminates — but
-// the checker also normalises some sub-terms before they are fully verified, so
-// a fuel counter guards against runaway reduction on ill-typed input.
+// types we reduce both to normal form and check them up to renaming. Reduction
+// here is beta (apply a lambda) plus delta (unfold a definition body); postulated
+// constants have no body and stay opaque. Because well-typed CoC terms are
+// strongly normalising, normalisation terminates — but the checker also
+// normalises some sub-terms before they are fully verified, so a fuel counter
+// guards against runaway reduction on ill-typed or self-referential input.
 
 import type { CTerm } from './ast'
 import { alphaEquiv, cApp, cLam, cPi, cVar, freeVars, freshName } from './ast'
+
+// A delta environment: maps a defined name to the term it abbreviates. Names
+// absent from the map (postulates, locally bound variables) are left alone.
+export type Defs = Map<string, CTerm>
+
+const NO_DEFS: Defs = new Map()
 
 // Capture-avoiding substitution: replace free occurrences of `name` with `value`.
 export function subst(term: CTerm, name: string, value: CTerm): CTerm {
@@ -70,17 +78,25 @@ export class ReductionLimitError extends Error {
 }
 
 // Weak head normal form: reduce just enough to expose the outermost constructor
-// (used to see whether a type is a Pi, a Sort, etc.).
-export function whnf(term: CTerm): CTerm {
-  return whnfWith(term, new Fuel())
+// (used to see whether a type is a Pi, a Sort, etc.). Unfolds head definitions.
+export function whnf(term: CTerm, defs: Defs = NO_DEFS): CTerm {
+  return whnfWith(term, defs, new Fuel())
 }
 
-function whnfWith(term: CTerm, fuel: Fuel): CTerm {
+function whnfWith(term: CTerm, defs: Defs, fuel: Fuel): CTerm {
   let t = term
-  // Unwind a spine of applications, firing any head beta-redex.
   for (;;) {
+    if (t.kind === 'var') {
+      const body = defs.get(t.name)
+      if (body) {
+        fuel.burn()
+        t = body
+        continue
+      }
+      return t
+    }
     if (t.kind === 'app') {
-      const f = whnfWith(t.func, fuel)
+      const f = whnfWith(t.func, defs, fuel)
       if (f.kind === 'lam') {
         fuel.burn()
         t = subst(f.body, f.param, t.arg)
@@ -92,28 +108,28 @@ function whnfWith(term: CTerm, fuel: Fuel): CTerm {
   }
 }
 
-// Full beta-normal form: reduce everywhere, including under binders.
-export function normalize(term: CTerm): CTerm {
-  return normWith(term, new Fuel())
+// Full beta/delta-normal form: reduce everywhere, including under binders.
+export function normalize(term: CTerm, defs: Defs = NO_DEFS): CTerm {
+  return normWith(term, defs, new Fuel())
 }
 
-function normWith(term: CTerm, fuel: Fuel): CTerm {
-  const t = whnfWith(term, fuel)
+function normWith(term: CTerm, defs: Defs, fuel: Fuel): CTerm {
+  const t = whnfWith(term, defs, fuel)
   switch (t.kind) {
     case 'var':
     case 'sort':
       return t
     case 'app':
-      return cApp(normWith(t.func, fuel), normWith(t.arg, fuel))
+      return cApp(normWith(t.func, defs, fuel), normWith(t.arg, defs, fuel))
     case 'lam':
-      return cLam(t.param, normWith(t.domain, fuel), normWith(t.body, fuel))
+      return cLam(t.param, normWith(t.domain, defs, fuel), normWith(t.body, defs, fuel))
     case 'pi':
-      return cPi(t.param, normWith(t.domain, fuel), normWith(t.codomain, fuel))
+      return cPi(t.param, normWith(t.domain, defs, fuel), normWith(t.codomain, defs, fuel))
   }
 }
 
-// Definitional equality: two terms are equal when their beta-normal forms are
-// alpha-equivalent.
-export function defEqual(a: CTerm, b: CTerm): boolean {
-  return alphaEquiv(normalize(a), normalize(b))
+// Definitional equality: two terms are equal when their normal forms (modulo
+// beta and delta) are alpha-equivalent.
+export function defEqual(a: CTerm, b: CTerm, defs: Defs = NO_DEFS): boolean {
+  return alphaEquiv(normalize(a, defs), normalize(b, defs))
 }

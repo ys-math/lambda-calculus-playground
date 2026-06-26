@@ -48,4 +48,29 @@ export const COC_EXAMPLE_GROUPS: CoCExampleGroup[] = [
       { label: 'Pi over a value', expr: 'fun (P : Nat -> Prop) (h : forall (n : Nat), P n) => h zero', note: 'P depends on a Nat' },
     ],
   },
+  {
+    title: 'Logic: truth, falsity, negation',
+    examples: [
+      { label: 'True', expr: 'forall (A : Prop), A -> A', note: 'the proposition that is always provable' },
+      { label: 'False', expr: 'forall (A : Prop), A', note: 'the proposition with no proof' },
+      { label: 'not', expr: 'fun (P : Prop) => P -> (forall (A : Prop), A)', note: 'negation: ¬P = P → False' },
+      { label: 'ex falso', expr: 'fun (C : Prop) (h : forall (A : Prop), A) => h C', note: 'from False, anything follows' },
+    ],
+  },
+  {
+    title: 'Connectives: ∧, ∨, ∃',
+    examples: [
+      { label: 'And', expr: 'fun (A B : Prop) => forall (C : Prop), (A -> B -> C) -> C', note: 'conjunction A ∧ B' },
+      { label: 'pair (∧-intro)', expr: 'fun (A B : Prop) (a : A) (b : B) (C : Prop) (k : A -> B -> C) => k a b', note: 'build a proof of A ∧ B' },
+      { label: 'Or', expr: 'fun (A B : Prop) => forall (C : Prop), (A -> C) -> (B -> C) -> C', note: 'disjunction A ∨ B' },
+      { label: 'Exists', expr: 'fun (A : Prop) (P : A -> Prop) => forall (C : Prop), (forall (x : A), P x -> C) -> C', note: 'existential ∃x:A, P x' },
+    ],
+  },
+  {
+    title: 'Equality (Leibniz)',
+    examples: [
+      { label: 'eq', expr: 'fun (A : Prop) (x y : A) => forall (P : A -> Prop), P x -> P y', note: 'x = y : indistinguishable by every predicate' },
+      { label: 'refl', expr: 'fun (A : Prop) (x : A) (P : A -> Prop) (px : P x) => px', note: 'proof that x = x' },
+    ],
+  },
 ]

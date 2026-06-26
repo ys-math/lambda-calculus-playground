@@ -2,13 +2,24 @@
 // (for KaTeX display). The grammar mirrors the Coq/Lean-flavoured parser:
 //   λ shows as `fun (x : A) => M` in ASCII and `\lambda (x{:}A).\,M` in LaTeX,
 //   ∀ shows as `forall (x : A), B`, and a non-dependent binder prints as `A -> B`.
+//
+// A `CPath` identifies a sub-term by the branches taken from the root. The LaTeX
+// renderer can wrap the sub-term at a given path in a highlight so the active
+// redex stands out while stepping (same approach as the untyped pretty printer).
 
 import type { CTerm } from './ast'
 import { ARROW_PARAM, freeVars } from './ast'
 
+export type CBranch = 'func' | 'arg' | 'domain' | 'body' | 'codomain'
+export type CPath = CBranch[]
+
 // A binder is "arrow-like" when its variable is never used in the body.
 function isArrow(param: string, codomain: CTerm): boolean {
   return param === ARROW_PARAM || !freeVars(codomain).has(param)
+}
+
+function pathEq(a: CPath, b: CPath): boolean {
+  return a.length === b.length && a.every((x, i) => x === b[i])
 }
 
 // --- ASCII -----------------------------------------------------------------
@@ -22,7 +33,6 @@ export function toAscii(term: CTerm): string {
         return t.sort === 'prop' ? 'Prop' : 'Type'
       case 'pi': {
         if (isArrow(t.param, t.codomain)) {
-          // Right-associative arrow; left side needs parens if it is an arrow too.
           const s = `${go(t.domain, 1)} -> ${go(t.codomain, 0)}`
           return prec > 0 ? `(${s})` : s
         }
@@ -34,9 +44,7 @@ export function toAscii(term: CTerm): string {
         return prec > 0 ? `(${s})` : s
       }
       case 'app': {
-        const f = go(t.func, 2)
-        const a = go(t.arg, 3)
-        const s = `${f} ${a}`
+        const s = `${go(t.func, 2)} ${go(t.arg, 3)}`
         return prec > 2 ? `(${s})` : s
       }
     }
@@ -46,38 +54,50 @@ export function toAscii(term: CTerm): string {
 
 // --- LaTeX -----------------------------------------------------------------
 
-export function toLatex(term: CTerm): string {
-  const go = (t: CTerm, prec: number): string => {
+// Render `term` to LaTeX. If `highlight` is given, the sub-term at that path is
+// wrapped in \htmlClass{redex}{…} so CSS can highlight it.
+export function toLatex(term: CTerm, highlight?: CPath): string {
+  const go = (t: CTerm, prec: number, path: CPath): string => {
+    let core: string
+    let needParen = false
     switch (t.kind) {
       case 'var':
-        return escapeIdent(t.name)
+        core = escapeIdent(t.name)
+        break
       case 'sort':
-        return t.sort === 'prop' ? '\\mathsf{Prop}' : '\\mathsf{Type}'
+        core = t.sort === 'prop' ? '\\mathsf{Prop}' : '\\mathsf{Type}'
+        break
       case 'pi': {
+        const dom = [...path, 'domain'] as CPath
+        const cod = [...path, 'codomain'] as CPath
         if (isArrow(t.param, t.codomain)) {
-          const s = `${go(t.domain, 1)} \\to ${go(t.codomain, 0)}`
-          return prec > 0 ? paren(s) : s
+          core = `${go(t.domain, 1, dom)} \\to ${go(t.codomain, 0, cod)}`
+          needParen = prec > 0
+        } else {
+          core = `\\forall\\,(${escapeIdent(t.param)} {:}\\, ${go(t.domain, 0, dom)}),\\; ${go(t.codomain, 0, cod)}`
+          needParen = prec > 0
         }
-        const s = `\\forall\\,(${escapeIdent(t.param)} {:}\\, ${go(t.domain, 0)}),\\; ${go(t.codomain, 0)}`
-        return prec > 0 ? paren(s) : s
+        break
       }
       case 'lam': {
-        const s = `\\lambda\\,(${escapeIdent(t.param)} {:}\\, ${go(t.domain, 0)}).\\; ${go(t.body, 0)}`
-        return prec > 0 ? paren(s) : s
+        const dom = [...path, 'domain'] as CPath
+        const bod = [...path, 'body'] as CPath
+        core = `\\lambda\\,(${escapeIdent(t.param)} {:}\\, ${go(t.domain, 0, dom)}).\\; ${go(t.body, 0, bod)}`
+        needParen = prec > 0
+        break
       }
       case 'app': {
-        const f = go(t.func, 2)
-        const a = go(t.arg, 3)
-        const s = `${f}\\; ${a}`
-        return prec > 2 ? paren(s) : s
+        const fn = [...path, 'func'] as CPath
+        const ar = [...path, 'arg'] as CPath
+        core = `${go(t.func, 2, fn)}\\; ${go(t.arg, 3, ar)}`
+        needParen = prec > 2
+        break
       }
     }
+    const wrapped = highlight && pathEq(path, highlight) ? `\\htmlClass{redex}{${core}}` : core
+    return needParen ? `(${wrapped})` : wrapped
   }
-  return go(term, 0)
-}
-
-function paren(inner: string): string {
-  return `(${inner})`
+  return go(term, 0, [])
 }
 
 // Identifiers may contain ' ? ! and digits — render primes/subscripts nicely.

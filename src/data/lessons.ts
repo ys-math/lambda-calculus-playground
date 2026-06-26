@@ -702,4 +702,133 @@ export const LESSONS: Lesson[] = [
       { kind: 'try', expr: 'fun (A B C : Prop) (g : B -> C) (f : A -> B) (x : A) => g (f x)', caption: 'Compose two implications' },
     ],
   },
+  {
+    id: 'coc-definitions',
+    section: 'coc',
+    title: 'Defining and reusing your own names',
+    blocks: [
+      {
+        kind: 'p',
+        text:
+          'Real developments give names to things. The Definitions panel (in CoC mode) lets you do that in two ways. An abbreviation binds a name to a term with “=”, and the name unfolds to its body when you compute. A postulate declares an abstract constant with “:”, giving it a type but no definition.',
+      },
+      {
+        kind: 'math',
+        latex:
+          '\\mathsf{Bool} = \\forall\\,(A {:}\\, \\mathsf{Prop}),\\; A \\to A \\to A \\qquad\\quad \\mathsf{Color} : \\mathsf{Prop}',
+      },
+      {
+        kind: 'p',
+        text:
+          'Try it: in the Definitions panel add  Bool = forall (A : Prop), A -> A  and  tru = fun (A : Prop) (t f : A) => t . Then type  tru  in the term box and read its type — it is Bool. Abstract types are postulated in Prop, e.g.  Color : Prop , after which  Color  is a usable type with no constructors.',
+      },
+      {
+        kind: 'p',
+        text:
+          'Names you define are available to later definitions and to the term you are editing. The standard library (Nat, Bool, zero, succ, …) is itself just a list of postulates you can build on.',
+      },
+      { kind: 'try', expr: 'fun (A : Prop) (t f : A) => t', caption: 'A Church boolean (type it, then save it as a name)' },
+    ],
+  },
+  {
+    id: 'coc-steps',
+    section: 'coc',
+    title: 'Computing: watch the steps (β and δ)',
+    blocks: [
+      {
+        kind: 'p',
+        text:
+          'Type-checking a term also lets you run it. The Calculation panel reduces the term one step at a time so you can watch it compute. Two kinds of step appear: a β-step applies a function to an argument, and a δ-step unfolds one of your definitions to its body.',
+      },
+      {
+        kind: 'math',
+        latex:
+          '(\\lambda\\,(A{:}\\,\\mathsf{Prop}).\\,\\lambda\\,(x{:}A).\\,x)\\; \\mathsf{Bool} \\;\\xrightarrow{\\;\\beta\\;}\\; \\lambda\\,(x{:}\\mathsf{Bool}).\\,x',
+      },
+      {
+        kind: 'p',
+        text:
+          'Load the application below and press Step ▶: the highlighted redex is rewritten and the step is labelled β-reduction. To see a δ-step, first define  id = fun (A : Prop) (x : A) => x  in the panel, then type  id Bool : stepping unfolds id (δ) and then reduces (β).',
+      },
+      { kind: 'try', expr: '(fun (A : Prop) (x : A) => x) Bool', caption: 'Reduce id Bool step by step' },
+    ],
+  },
+  {
+    id: 'coc-logic',
+    section: 'coc',
+    title: 'Logic: True, False, and negation',
+    blocks: [
+      {
+        kind: 'p',
+        text:
+          'Under propositions-as-types we can define the logical constants directly. True is a proposition that always has a proof; False is a proposition that has none. The neat trick: False is the type “for all A, A” — if you had a proof of it you could prove anything.',
+      },
+      {
+        kind: 'math',
+        latex:
+          '\\top \\;:=\\; \\forall\\,(A{:}\\,\\mathsf{Prop}),\\; A \\to A \\qquad\\qquad \\bot \\;:=\\; \\forall\\,(A{:}\\,\\mathsf{Prop}),\\; A',
+      },
+      {
+        kind: 'p',
+        text:
+          'Negation is then ¬P = P → False, and “ex falso quodlibet” (from a contradiction, anything follows) is just applying a proof of False to the proposition you want. Load False and the ex-falso term and read their types.',
+      },
+      { kind: 'math', latex: '\\neg P \\;:=\\; P \\to \\bot' },
+      { kind: 'try', expr: 'forall (A : Prop), A', caption: 'False (the empty proposition)' },
+      { kind: 'try', expr: 'fun (C : Prop) (h : forall (A : Prop), A) => h C', caption: 'Ex falso: False → C' },
+    ],
+  },
+  {
+    id: 'coc-connectives',
+    section: 'coc',
+    title: 'And, Or, Exists — encoding the connectives',
+    blocks: [
+      {
+        kind: 'p',
+        text:
+          'Conjunction, disjunction, and the existential quantifier all have impredicative encodings: each says “whatever you could conclude from the pieces, you can conclude from the whole”. A proof of A ∧ B is something that, given a way to use both A and B to reach any goal C, reaches C.',
+      },
+      {
+        kind: 'math',
+        latex:
+          'A \\wedge B \\;:=\\; \\forall\\,(C{:}\\,\\mathsf{Prop}),\\; (A \\to B \\to C) \\to C',
+      },
+      {
+        kind: 'math',
+        latex:
+          'A \\vee B \\;:=\\; \\forall\\,(C{:}\\,\\mathsf{Prop}),\\; (A \\to C) \\to (B \\to C) \\to C',
+      },
+      {
+        kind: 'p',
+        text:
+          'The existential ∃x:A, P x is similar, quantifying over a witness. Load the And encoding and its pairing proof; notice the pair is exactly the function that feeds a and b to the continuation k.',
+      },
+      { kind: 'try', expr: 'fun (A B : Prop) => forall (C : Prop), (A -> B -> C) -> C', caption: 'And: A ∧ B' },
+      { kind: 'try', expr: 'fun (A B : Prop) (a : A) (b : B) (C : Prop) (k : A -> B -> C) => k a b', caption: '∧-intro: build a proof of A ∧ B' },
+    ],
+  },
+  {
+    id: 'coc-equality',
+    section: 'coc',
+    title: 'Equality as a type (Leibniz)',
+    blocks: [
+      {
+        kind: 'p',
+        text:
+          'CoC can even express equality, using Leibniz’s principle: x equals y exactly when every property P that holds of x also holds of y. Equality is therefore a proposition — a type — built from a quantifier over predicates P : A → Prop.',
+      },
+      {
+        kind: 'math',
+        latex:
+          'x =_{A} y \\;:=\\; \\forall\\,(P{:}\\,A \\to \\mathsf{Prop}),\\; P\\,x \\to P\\,y',
+      },
+      {
+        kind: 'p',
+        text:
+          'Reflexivity — a proof that x = x — is the identity function: any proof that P holds of x is already a proof that P holds of x. Load eq and refl and inspect their types; refl inhabits eq A x x.',
+      },
+      { kind: 'try', expr: 'fun (A : Prop) (x y : A) => forall (P : A -> Prop), P x -> P y', caption: 'eq : equality of x and y' },
+      { kind: 'try', expr: 'fun (A : Prop) (x : A) (P : A -> Prop) (px : P x) => px', caption: 'refl : a proof of x = x' },
+    ],
+  },
 ]

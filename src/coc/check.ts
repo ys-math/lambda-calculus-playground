@@ -4,12 +4,14 @@
 // sorts — Prop (`*`) and Type (`□`) — the axiom Prop : Type, and every product
 // rule (s₁, s₂) allowed, so types can depend on terms (dependent types), on
 // types (polymorphism), and types can be computed from types. We infer the type
-// of a term by structural recursion, using `defEqual` (compare beta-normal forms)
-// whenever two types must agree.
+// of a term by structural recursion, using `defEqual` (compare normal forms,
+// modulo beta and delta) whenever two types must agree. Definitions in `defs`
+// are unfolded on demand during conversion checking.
 
 import type { CTerm, Sort } from './ast'
 import { cPi, freeVars } from './ast'
 import { toAscii } from './pretty'
+import type { Defs } from './normalize'
 import { defEqual, normalize, ReductionLimitError, subst, whnf } from './normalize'
 
 // A typing context: a stack of (variable : type) bindings; later entries shadow.
@@ -34,20 +36,21 @@ function lookup(ctx: Context, name: string): CTerm | undefined {
   return undefined
 }
 
-// Infer the type of `term` in `ctx`, then return both its type and its normal
-// form. Type errors are reported as friendly messages.
-export function check(term: CTerm, ctx: Context = []): CheckResult {
+// Infer the type of `term` in `ctx` (with definitions `defs` available for
+// unfolding), then return both its type and its normal form. Type errors are
+// reported as friendly messages.
+export function check(term: CTerm, ctx: Context = [], defs: Defs = new Map()): CheckResult {
   try {
-    const t = infer(term, ctx)
+    const t = infer(term, ctx, defs)
     if (!t.ok) return t
-    return { ok: true, type: normalize(t.type), normal: normalize(term) }
+    return { ok: true, type: normalize(t.type, defs), normal: normalize(term, defs) }
   } catch (e) {
     if (e instanceof ReductionLimitError) return err(e.message)
     throw e
   }
 }
 
-function infer(term: CTerm, ctx: Context): Infer {
+function infer(term: CTerm, ctx: Context, defs: Defs): Infer {
   switch (term.kind) {
     case 'var': {
       const ty = lookup(ctx, term.name)
@@ -64,45 +67,45 @@ function infer(term: CTerm, ctx: Context): Infer {
     case 'pi': {
       // Domain must be a type (its type is a sort); the codomain, in the extended
       // context, must also live in a sort. The product itself lives in that sort.
-      const s1 = inferSort(term.domain, ctx, 'The domain of a function type')
+      const s1 = inferSort(term.domain, ctx, defs, 'The domain of a function type')
       if (!s1.ok) return s1
       const ctx2 = ctx.concat({ name: term.param, type: term.domain })
-      const s2 = inferSort(term.codomain, ctx2, 'The result of a function type')
+      const s2 = inferSort(term.codomain, ctx2, defs, 'The result of a function type')
       if (!s2.ok) return s2
       return { ok: true, type: { kind: 'sort', sort: s2.sort } }
     }
 
     case 'lam': {
       // The annotation must be a type; infer the body in the extended context.
-      const s = inferSort(term.domain, ctx, 'A function parameter’s type')
+      const s = inferSort(term.domain, ctx, defs, 'A function parameter’s type')
       if (!s.ok) return s
       const ctx2 = ctx.concat({ name: term.param, type: term.domain })
-      const bodyTy = infer(term.body, ctx2)
+      const bodyTy = infer(term.body, ctx2, defs)
       if (!bodyTy.ok) return bodyTy
       const piTy = cPi(term.param, term.domain, bodyTy.type)
       // The resulting Pi type must itself be well-formed.
-      const piSort = inferSort(piTy, ctx, 'The inferred function type')
+      const piSort = inferSort(piTy, ctx, defs, 'The inferred function type')
       if (!piSort.ok) return piSort
       return { ok: true, type: piTy }
     }
 
     case 'app': {
-      const fnTy = infer(term.func, ctx)
+      const fnTy = infer(term.func, ctx, defs)
       if (!fnTy.ok) return fnTy
-      const head = whnf(fnTy.type)
+      const head = whnf(fnTy.type, defs)
       if (head.kind !== 'pi') {
         return err(
           `“${toAscii(term.func)}” is applied to an argument but is not a function ` +
-            `(its type is ${toAscii(normalize(fnTy.type))}).`,
+            `(its type is ${toAscii(normalize(fnTy.type, defs))}).`,
         )
       }
-      const argTy = infer(term.arg, ctx)
+      const argTy = infer(term.arg, ctx, defs)
       if (!argTy.ok) return argTy
-      if (!defEqual(argTy.type, head.domain)) {
+      if (!defEqual(argTy.type, head.domain, defs)) {
         return err(
           `Type mismatch: the function expects an argument of type ` +
-            `${toAscii(normalize(head.domain))}, but “${toAscii(term.arg)}” has type ` +
-            `${toAscii(normalize(argTy.type))}.`,
+            `${toAscii(normalize(head.domain, defs))}, but “${toAscii(term.arg)}” has type ` +
+            `${toAscii(normalize(argTy.type, defs))}.`,
         )
       }
       // Dependent result: substitute the actual argument into the codomain.
@@ -115,12 +118,12 @@ type SortResult = { ok: true; sort: Sort } | { ok: false; error: string }
 
 // Infer the type of `t`, then require it to be a sort (Prop or Type) — i.e. that
 // `t` is itself a type/kind. `role` is used in the error message.
-function inferSort(t: CTerm, ctx: Context, role: string): SortResult {
-  const ty = infer(t, ctx)
+function inferSort(t: CTerm, ctx: Context, defs: Defs, role: string): SortResult {
+  const ty = infer(t, ctx, defs)
   if (!ty.ok) return ty
-  const w = whnf(ty.type)
+  const w = whnf(ty.type, defs)
   if (w.kind !== 'sort') {
-    return err(`${role} must be a type, but “${toAscii(t)}” has type ${toAscii(normalize(ty.type))}.`)
+    return err(`${role} must be a type, but “${toAscii(t)}” has type ${toAscii(normalize(ty.type, defs))}.`)
   }
   return { ok: true, sort: w.sort }
 }

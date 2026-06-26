@@ -33,6 +33,8 @@ export default function App() {
   const [eta, setEta] = useState(false)
   const [showAlpha, setShowAlpha] = useState(true)
   const [userDefs, setUserDefs] = useState<Definition[]>([])
+  // CoC definitions (abbreviations + postulates), kept as raw source lines.
+  const [cocDefs, setCocDefs] = useState<string[]>([])
   // The active calculus (Untyped / Simply Typed / CoC) persists across sessions.
   const [mode, setMode] = useLocalStorage<Mode>('lambda-playground:mode', 'untyped')
   const typed = mode === 'typed'
@@ -87,6 +89,15 @@ export default function App() {
   const insertName = (name: string) => {
     setInput((cur) => (cur.length === 0 || cur.endsWith(' ') ? cur + name : cur + ' ' + name))
   }
+  const addCocDef = (source: string) => {
+    setCocDefs((list) => [...list, source])
+  }
+  const removeCocDef = (source: string) => {
+    setCocDefs((list) => {
+      const i = list.indexOf(source)
+      return i === -1 ? list : [...list.slice(0, i), ...list.slice(i + 1)]
+    })
+  }
   const saveCurrentFormula = () => {
     setSavedFormulas((list) => addFormula(list, input))
   }
@@ -133,7 +144,13 @@ export default function App() {
       </header>
 
       {mode === 'coc' ? (
-        <CoCWorkspace value={input} onChange={setInput} />
+        <CoCWorkspace
+          value={input}
+          onChange={setInput}
+          defSources={cocDefs}
+          onAddDef={addCocDef}
+          onRemoveDef={removeCocDef}
+        />
       ) : (
       <div className="workspace">
         <TermInput value={input} onChange={setInput} term={term} error={error} />

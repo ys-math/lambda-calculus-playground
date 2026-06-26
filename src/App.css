@@ -165,12 +165,19 @@
   grid-template-areas:
     'input  side'
     'result side'
+    'steps  side'
     'filler side';
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: auto auto auto 1fr;
 }
 .coc-workspace > .term-input { grid-area: input; }
 .coc-workspace > .typing.coc-result { grid-area: result; }
+.coc-workspace > .coc-steps { grid-area: steps; }
 .coc-workspace > .ws-side { grid-area: side; }
+
+.coc-steps h2 {
+  margin: 0 0 10px;
+  font-size: 1.2rem;
+}
 
 @media (max-width: 900px) {
   .coc-workspace {
@@ -178,8 +185,42 @@
     grid-template-areas:
       'input'
       'result'
+      'steps'
       'side';
   }
+}
+
+/* δ-unfold step badge (β reuses the untyped kind-beta colour). */
+.kind-badge.kind-delta {
+  background: #ece3fb;
+  color: #5b3fa8;
+}
+
+/* Definition kind tags in the CoC Definitions panel. */
+.def-kind {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 6px;
+  margin: 0 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.def-kind-def {
+  background: #e6f0ff;
+  color: #2a5db0;
+}
+.def-kind-postulate {
+  background: #fdecef;
+  color: #a33b57;
+}
+.coc-definitions .def-bad .def-error {
+  color: var(--error);
+  font-size: 0.82rem;
+  margin-left: 6px;
+}
+.coc-definitions .def-source-bad {
+  color: var(--muted);
 }
 
 .coc-normal {
