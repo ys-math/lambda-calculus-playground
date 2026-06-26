@@ -15,8 +15,9 @@ describe('lesson content', () => {
     }
   })
 
-  it('has both sections with lessons', () => {
+  it('has all three sections with lessons', () => {
     expect(LESSONS.some((l) => l.section === 'untyped')).toBe(true)
     expect(LESSONS.some((l) => l.section === 'typed')).toBe(true)
+    expect(LESSONS.some((l) => l.section === 'coc')).toBe(true)
   })
 })

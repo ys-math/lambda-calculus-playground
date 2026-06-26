@@ -2,10 +2,11 @@ import { useState } from 'react'
 import MathView from './MathView'
 import { LESSONS } from '../data/lessons'
 import type { Lesson, LessonSection } from '../data/lessons'
+import type { Mode } from '../App'
 
 interface LessonsProps {
   onLoad: (expr: string) => void
-  onSelectMode: (typed: boolean) => void
+  onSelectMode: (mode: Mode) => void
 }
 
 const SECTIONS: { id: LessonSection; title: string; desc: string }[] = [
@@ -19,6 +20,11 @@ const SECTIONS: { id: LessonSection; title: string; desc: string }[] = [
     title: 'Typed lambda calculus',
     desc: 'Add a type discipline: every term gets a simple type, ruling out the paradoxical ones.',
   },
+  {
+    id: 'coc',
+    title: 'Calculus of Constructions',
+    desc: 'Dependent types: terms, types, and proofs in one language — the basis of proof assistants like Coq and Lean.',
+  },
 ]
 
 // The guided learning panel. Lessons are grouped into an Untyped and a Typed
@@ -28,7 +34,7 @@ export default function Lessons({ onLoad, onSelectMode }: LessonsProps) {
   const [openId, setOpenId] = useState<string>(LESSONS[0].id)
 
   const tryExpr = (lesson: Lesson, expr: string) => {
-    onSelectMode(lesson.section === 'typed')
+    onSelectMode(lesson.section)
     onLoad(expr)
   }
 

@@ -9,7 +9,7 @@ export type LessonBlock =
   | { kind: 'math'; latex: string }
   | { kind: 'try'; expr: string; caption: string }
 
-export type LessonSection = 'untyped' | 'typed'
+export type LessonSection = 'untyped' | 'typed' | 'coc'
 
 export interface Lesson {
   id: string
@@ -567,6 +567,139 @@ export const LESSONS: Lesson[] = [
       { kind: 'try', expr: '\\x. x', caption: 'Proof of a → a' },
       { kind: 'try', expr: '\\x y. x', caption: 'Proof of a → b → a' },
       { kind: 'try', expr: '\\f g x. f x (g x)', caption: 'Proof of the S axiom' },
+    ],
+  },
+
+  // ================= Calculus of Constructions =================
+  {
+    id: 'coc-intro',
+    section: 'coc',
+    title: 'What is the Calculus of Constructions?',
+    blocks: [
+      {
+        kind: 'p',
+        text:
+          'The Calculus of Constructions (CoC) is a lambda calculus with dependent types. Here types are not a separate layer bolted on top of terms — types are themselves terms, written in the very same language. This one idea is the foundation of modern proof assistants like Coq and Lean.',
+      },
+      {
+        kind: 'p',
+        text:
+          'Because types are terms, a function can take a type as an argument and return one, types can be computed, and — the key novelty — a type may mention a value. “A list of length n” is a type that depends on the number n. That is what “dependent” means.',
+      },
+      {
+        kind: 'p',
+        text:
+          'Switch to the CoC tab (top right) to follow along. The input uses Coq/Lean-style syntax: fun (x : A) => body for a function, forall (x : A), B for a dependent function type, A -> B for an ordinary one. The panel shows each term’s type and its normal form.',
+      },
+      { kind: 'try', expr: 'fun (A : Prop) (x : A) => x', caption: 'The polymorphic identity' },
+    ],
+  },
+  {
+    id: 'coc-sorts',
+    section: 'coc',
+    title: 'Two universes: Prop and Type',
+    blocks: [
+      {
+        kind: 'p',
+        text:
+          'If types are terms, then types must have types too. CoC organises them into two universes (called sorts): Prop, the universe of propositions and small types, and Type, the universe above it. The fundamental axiom is that Prop itself has type Type.',
+      },
+      {
+        kind: 'math',
+        latex: '\\mathsf{Prop} : \\mathsf{Type}',
+      },
+      {
+        kind: 'p',
+        text:
+          'So there are layers: a value like x lives in a type like A; that type A lives in Prop; and Prop lives in Type. Load Prop below and read its type in the panel — it is Type. (Type has no type of its own; it is the top of the tower.)',
+      },
+      { kind: 'try', expr: 'Prop', caption: 'Load Prop (its type is Type)' },
+    ],
+  },
+  {
+    id: 'coc-pi',
+    section: 'coc',
+    title: 'Dependent function types (∀)',
+    blocks: [
+      {
+        kind: 'p',
+        text:
+          'The heart of CoC is the dependent function type, written forall (x : A), B. It is the type of functions that take an x of type A and return a result of type B — where B is allowed to mention x. When B does not mention x, it collapses to the ordinary arrow A -> B.',
+      },
+      {
+        kind: 'math',
+        latex:
+          '\\mathsf{id} \\;:\\; \\forall\\,(A {:}\\, \\mathsf{Prop}),\\; A \\to A',
+      },
+      {
+        kind: 'p',
+        text:
+          'Look at the polymorphic identity. It first takes a type A, then an x of that type, and returns x. Its type is a forall: the type of the second argument and of the result both depend on the first argument A. That dependence is impossible to express in the simply typed calculus.',
+      },
+      {
+        kind: 'p',
+        text:
+          'Applying it to a concrete type specialises it. Feed Bool to id and the panel shows the result has type Bool -> Bool — the A in the type has been replaced by Bool. This substitution-into-the-type is exactly the →E rule made dependent.',
+      },
+      { kind: 'try', expr: 'fun (A : Prop) (x : A) => x', caption: 'id : ∀(A:Prop), A → A' },
+      { kind: 'try', expr: '(fun (A : Prop) (x : A) => x) Bool', caption: 'id Bool : Bool → Bool' },
+    ],
+  },
+  {
+    id: 'coc-encodings',
+    section: 'coc',
+    title: 'Data from nothing: Church encodings',
+    blocks: [
+      {
+        kind: 'p',
+        text:
+          'With dependent/polymorphic functions you can build data types using no built-in data at all — the same Church encodings as in the untyped calculus, but now they have honest types. A boolean is anything that, given two results of some type A, picks one.',
+      },
+      {
+        kind: 'math',
+        latex: '\\mathsf{Bool} \\;:=\\; \\forall\\,(A {:}\\, \\mathsf{Prop}),\\; A \\to A \\to A',
+      },
+      {
+        kind: 'p',
+        text:
+          'A natural number is anything that, given a function f and a start x, applies f some number of times. “Two” applies f twice. Load these and check their types in the panel; they are the encodings’ types written as foralls.',
+      },
+      {
+        kind: 'math',
+        latex:
+          '\\mathsf{Nat} \\;:=\\; \\forall\\,(A {:}\\, \\mathsf{Prop}),\\; (A \\to A) \\to A \\to A',
+      },
+      { kind: 'try', expr: 'fun (A : Prop) (t : A) (f : A) => t', caption: 'true : Church Bool' },
+      { kind: 'try', expr: 'fun (A : Prop) (f : A -> A) (x : A) => f (f x)', caption: 'two : Church Nat' },
+    ],
+  },
+  {
+    id: 'coc-curry-howard',
+    section: 'coc',
+    title: 'Propositions as types, proofs as programs',
+    blocks: [
+      {
+        kind: 'p',
+        text:
+          'In the simply typed calculus, → was implication. CoC extends the dictionary: the dependent function forall (x : A), B is the universal quantifier “for all x in A, B holds”. A term of that type is a uniform proof that works for every x. This is why CoC can serve as a logic.',
+      },
+      {
+        kind: 'p',
+        text:
+          'Modus ponens is still just function application: from a proof of A -> B and a proof of A, applying one to the other yields a proof of B. The program is the proof; running it (normalising) is checking the proof.',
+      },
+      {
+        kind: 'math',
+        latex:
+          '\\dfrac{f : A \\to B \\qquad a : A}{f\\; a : B}\\;({\\to}\\mathsf{E})',
+      },
+      {
+        kind: 'p',
+        text:
+          'The example below takes propositions A and B, a proof f of A -> B, and a proof a of A, and produces a proof of B. Load it and confirm the panel reports its type as the implication ∀(A B:Prop), (A → B) → A → B.',
+      },
+      { kind: 'try', expr: 'fun (A B : Prop) (f : A -> B) (a : A) => f a', caption: 'Modus ponens' },
+      { kind: 'try', expr: 'fun (A B C : Prop) (g : B -> C) (f : A -> B) (x : A) => g (f x)', caption: 'Compose two implications' },
     ],
   },
 ]

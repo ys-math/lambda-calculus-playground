@@ -159,6 +159,83 @@
   }
 }
 
+/* CoC workspace: input on the left with the type/normal-form panel beneath it,
+   examples + standard context in the side column. */
+.coc-workspace {
+  grid-template-areas:
+    'input  side'
+    'result side'
+    'filler side';
+  grid-template-rows: auto auto 1fr;
+}
+.coc-workspace > .term-input { grid-area: input; }
+.coc-workspace > .typing.coc-result { grid-area: result; }
+.coc-workspace > .ws-side { grid-area: side; }
+
+@media (max-width: 900px) {
+  .coc-workspace {
+    grid-template-rows: none;
+    grid-template-areas:
+      'input'
+      'result'
+      'side';
+  }
+}
+
+.coc-normal {
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: var(--panel-2);
+  border-radius: 10px;
+  overflow-x: auto;
+}
+
+.coc-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.coc-note {
+  margin: 12px 0 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+/* Standard-context card: the declared constants CoC terms may refer to. */
+.coc-context {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--card-shadow);
+  padding: 16px;
+}
+.coc-context h2 {
+  margin: 0 0 6px;
+  font-size: 1.1rem;
+}
+.coc-context-note {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.coc-context-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.coc-context-list code {
+  background: var(--panel-2);
+  padding: 1px 5px;
+  border-radius: 5px;
+  font-size: 0.85rem;
+}
+
 /* The side column stacks the Definitions and Examples cards. */
 .ws-side {
   display: flex;

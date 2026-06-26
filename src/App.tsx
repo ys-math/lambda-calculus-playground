@@ -6,6 +6,7 @@ import Definitions from './components/Definitions'
 import Examples from './components/Examples'
 import SavedFormulas from './components/SavedFormulas'
 import TypePanel from './components/TypePanel'
+import CoCWorkspace from './components/CoCWorkspace'
 import Lessons from './components/Lessons'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import { addFormula, removeFormula } from './lib/savedFormulas'
@@ -22,6 +23,9 @@ import './App.css'
 
 const STEP_CAP_OPTIONS = [50, 200, 1000]
 
+// The three calculi the playground can be in.
+export type Mode = 'untyped' | 'typed' | 'coc'
+
 export default function App() {
   const [input, setInput] = useState('(\\x. x x) (\\y. y)')
   const [strategy, setStrategy] = useState<Strategy>('normal')
@@ -29,8 +33,9 @@ export default function App() {
   const [eta, setEta] = useState(false)
   const [showAlpha, setShowAlpha] = useState(true)
   const [userDefs, setUserDefs] = useState<Definition[]>([])
-  // Typed mode (Simply Typed λ-calculus) persists across sessions.
-  const [typed, setTyped] = useLocalStorage<boolean>('lambda-playground:typed-mode', false)
+  // The active calculus (Untyped / Simply Typed / CoC) persists across sessions.
+  const [mode, setMode] = useLocalStorage<Mode>('lambda-playground:mode', 'untyped')
+  const typed = mode === 'typed'
   // Saved formulas persist across sessions in localStorage.
   const [savedFormulas, setSavedFormulas] = useLocalStorage<string[]>(
     'lambda-playground:saved-formulas',
@@ -96,28 +101,40 @@ export default function App() {
           <h1>Lambda Calculus Playground</h1>
           <div className="mode-toggle" role="group" aria-label="Calculus mode">
             <button
-              className={typed ? '' : 'active'}
-              aria-pressed={!typed}
-              onClick={() => setTyped(false)}
+              className={mode === 'untyped' ? 'active' : ''}
+              aria-pressed={mode === 'untyped'}
+              onClick={() => setMode('untyped')}
             >
               Untyped
             </button>
             <button
-              className={typed ? 'active' : ''}
-              aria-pressed={typed}
-              onClick={() => setTyped(true)}
+              className={mode === 'typed' ? 'active' : ''}
+              aria-pressed={mode === 'typed'}
+              onClick={() => setMode('typed')}
             >
               Typed
+            </button>
+            <button
+              className={mode === 'coc' ? 'active' : ''}
+              aria-pressed={mode === 'coc'}
+              onClick={() => setMode('coc')}
+            >
+              CoC
             </button>
           </div>
         </div>
         <p className="tagline">
-          {typed
+          {mode === 'coc'
+            ? 'Calculus of Constructions: dependent types where terms, types, and proofs share one language — type a term, see its type and normal form.'
+            : typed
             ? 'Typed mode infers each term’s simple type and shows the typing derivation — reduction still runs alongside.'
             : 'An interactive tool for learning the untyped lambda calculus — type a term, watch it reduce step by step.'}
         </p>
       </header>
 
+      {mode === 'coc' ? (
+        <CoCWorkspace value={input} onChange={setInput} />
+      ) : (
       <div className="workspace">
         <TermInput value={input} onChange={setInput} term={term} error={error} />
 
@@ -181,8 +198,9 @@ export default function App() {
           <Examples onLoad={setInput} />
         </aside>
       </div>
+      )}
 
-      <Lessons onLoad={setInput} onSelectMode={setTyped} />
+      <Lessons onLoad={setInput} onSelectMode={setMode} />
 
       <footer className="app-footer">
         <p>
